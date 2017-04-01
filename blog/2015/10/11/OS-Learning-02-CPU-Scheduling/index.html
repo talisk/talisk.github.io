@@ -27,7 +27,7 @@
     <link rel="icon" href="/favicon.png">
   
   <link rel="stylesheet" href="/css/style.css">
-  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
   <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
   
 </head>
@@ -456,12 +456,12 @@
 <h3 id="MLFQ多级反馈队列调度"><a href="#MLFQ多级反馈队列调度" class="headerlink" title="MLFQ多级反馈队列调度"></a>MLFQ多级反馈队列调度</h3><p>Multi-Level Feedback Queue又称反馈循环队列，由系统建立多个就绪队列，每个队列对应一个优先级，第一队列优先级最高，其余队列优先级依次降低，高优先级队列的进程/线程分配较短时间片，低优先级队列分配较长时间片，最后一个队列按照FCFS进行调度，处理器调度每次先从第一个队列中选取执行者，同一队列按照FCFS排队执行。若第一队列未选到执行者， 那么从第二队列中选取。</p>
 <p>MLFQ性能较好，会导致饥饿问题。</p>
 
-        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+        <div id="cyReward" role="cylabs" data-use="reward" sid="/blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" style="text-align: center;"></div>
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.talisk.cn//blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" data-id="cj0z011ei000wfcjvt5b5gzse" class="article-share-link" data-share="baidu" data-title="操作系统学习笔记-01处理器管理">分享到</a>
+        <a data-url="http://blog.talisk.cn//blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" data-id="cj0z0egc5000uk9jv2m0msl8w" class="article-share-link" data-share="baidu" data-title="操作系统学习笔记-01处理器管理">分享到</a>
       
 
       
@@ -621,32 +621,11 @@ window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="tex
     </div>
   </div>
   
-    <!--多说js加载开始，一个页面只需要加载一次 -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"talisk"};
-(function() {
-    var ds = document.createElement('script');
-    ds.type = 'text/javascript';ds.async = true;
-    ds.src = 'http://static.duoshuo.com/embed.js';
-    ds.charset = 'UTF-8';
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
-})();
-</script>
-<!--多说js加载结束，一个页面只需要加载一次 -->
+    
   
-    <div class="widget-wrap">
-    <h3 class="widget-title">最新评论</h3>
-    <div class="widget">
-    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
-    </div>
-</div>
+    
   
-    <div class="widget-wrap">
-    <h3 class="widget-title">最近访客</h3>
-    <div class="widget">
-    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
-	</div>
-</div>
+    
   
 </aside>
       
@@ -680,9 +659,7 @@ var duoshuoQuery = {short_name:"talisk"};
     <a href="/works" class="mobile-nav-link">作品</a>
   
 </nav>
-  <!-- 百度打赏 -->
-<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
-<!-- totop start -->
+  <!-- totop start -->
 <div id="totop">
 <a title="返回顶部"><img src="/img/scrollup.png"/></a>
 </div>
@@ -690,17 +667,8 @@ var duoshuoQuery = {short_name:"talisk"};
 <!-- totop end -->
 
 <!-- 多说公共js代码 start -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"talisk"};
-  (function() {
-    var ds = document.createElement('script');
-    ds.type = 'text/javascript';ds.async = true;
-    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-    ds.charset = 'UTF-8';
-    (document.getElementsByTagName('head')[0]
-     || document.getElementsByTagName('body')[0]).appendChild(ds);
-  })();
-  </script>
+<script type="text/javascript" charset="utf-8" src="https://changyan.itc.cn/js/lib/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="https://changyan.sohu.com/js/changyan.labs.https.js?appid=cysVn6k21"></script>
 <!-- 多说公共js代码 end -->
 
 

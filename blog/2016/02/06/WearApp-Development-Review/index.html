@@ -27,7 +27,7 @@
     <link rel="icon" href="/favicon.png">
   
   <link rel="stylesheet" href="/css/style.css">
-  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <link href="//fonts.googleapis.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
   <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
   
 </head>
@@ -129,12 +129,12 @@
 <p>明天是除夕，估计年前百度那边不会有人修复这个问题了。</p>
 <p>接下来就是要说应用开发的过程了，我先挖好坑，等有时间再来填。</p>
 <h1 id="构思"><a href="#构思" class="headerlink" title="构思"></a>构思</h1><h1 id="开发"><a href="#开发" class="headerlink" title="开发"></a>开发</h1><h2 id="数据模型"><a href="#数据模型" class="headerlink" title="数据模型"></a>数据模型</h2><h2 id="数据刷新"><a href="#数据刷新" class="headerlink" title="数据刷新"></a>数据刷新</h2><h2 id="定位"><a href="#定位" class="headerlink" title="定位"></a>定位</h2><h2 id="UI"><a href="#UI" class="headerlink" title="UI"></a>UI</h2><h2 id="上架"><a href="#上架" class="headerlink" title="上架"></a>上架</h2><h1 id="TODO"><a href="#TODO" class="headerlink" title="TODO"></a>TODO</h1><h2 id="适配『今天』"><a href="#适配『今天』" class="headerlink" title="适配『今天』"></a>适配『今天』</h2><h2 id="适配3D-Touch"><a href="#适配3D-Touch" class="headerlink" title="适配3D Touch"></a>适配3D Touch</h2><h2 id="适配Apple-watch"><a href="#适配Apple-watch" class="headerlink" title="适配Apple watch"></a>适配Apple watch</h2>
-        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+        <div id="cyReward" role="cylabs" data-use="reward" sid="/blog/2016/02/06/WearApp-Development-Review/" style="text-align: center;"></div>
       
     </div>
     <footer class="article-footer">
       
-        <a data-url="http://blog.talisk.cn//blog/2016/02/06/WearApp-Development-Review/" data-id="cj0z011g00027fcjv51rdyrt4" class="article-share-link" data-share="baidu" data-title="Wear省心天气开发回顾——细数我的第一个应用上架路上的那些坑">分享到</a>
+        <a data-url="http://blog.talisk.cn//blog/2016/02/06/WearApp-Development-Review/" data-id="cj0z0egdg0027k9jvsav8ap0t" class="article-share-link" data-share="baidu" data-title="Wear省心天气开发回顾——细数我的第一个应用上架路上的那些坑">分享到</a>
       
 
       
@@ -294,32 +294,11 @@ window.document.write('<script id="changyan_mobile_js" charset="utf-8" type="tex
     </div>
   </div>
   
-    <!--多说js加载开始，一个页面只需要加载一次 -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"talisk"};
-(function() {
-    var ds = document.createElement('script');
-    ds.type = 'text/javascript';ds.async = true;
-    ds.src = 'http://static.duoshuo.com/embed.js';
-    ds.charset = 'UTF-8';
-    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
-})();
-</script>
-<!--多说js加载结束，一个页面只需要加载一次 -->
+    
   
-    <div class="widget-wrap">
-    <h3 class="widget-title">最新评论</h3>
-    <div class="widget">
-    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
-    </div>
-</div>
+    
   
-    <div class="widget-wrap">
-    <h3 class="widget-title">最近访客</h3>
-    <div class="widget">
-    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
-	</div>
-</div>
+    
   
 </aside>
       
@@ -353,9 +332,7 @@ var duoshuoQuery = {short_name:"talisk"};
     <a href="/works" class="mobile-nav-link">作品</a>
   
 </nav>
-  <!-- 百度打赏 -->
-<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
-<!-- totop start -->
+  <!-- totop start -->
 <div id="totop">
 <a title="返回顶部"><img src="/img/scrollup.png"/></a>
 </div>
@@ -363,17 +340,8 @@ var duoshuoQuery = {short_name:"talisk"};
 <!-- totop end -->
 
 <!-- 多说公共js代码 start -->
-<script type="text/javascript">
-var duoshuoQuery = {short_name:"talisk"};
-  (function() {
-    var ds = document.createElement('script');
-    ds.type = 'text/javascript';ds.async = true;
-    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
-    ds.charset = 'UTF-8';
-    (document.getElementsByTagName('head')[0]
-     || document.getElementsByTagName('body')[0]).appendChild(ds);
-  })();
-  </script>
+<script type="text/javascript" charset="utf-8" src="https://changyan.itc.cn/js/lib/jquery.js"></script>
+<script type="text/javascript" charset="utf-8" src="https://changyan.sohu.com/js/changyan.labs.https.js?appid=cysVn6k21"></script>
 <!-- 多说公共js代码 end -->
 
 
