@@ -115,8 +115,8 @@ button::-moz-focus-inner {
   font-family: FontAwesome;
   font-style: normal;
   font-weight: normal;
-  src: url("http://libs.useso.com/js/font-awesome/4.2.0/fonts/fontawesome-webfont.eot?v=#4.0.3");
-  src: url("http://libs.useso.com/js/font-awesome/4.2.0/fonts/fontawesome-webfont.eot?#iefix&v=#4.0.3") format("embedded-opentype"), url("http://libs.useso.com/js/font-awesome/4.2.0/fonts/fontawesome-webfont.woff?v=#4.0.3") format("woff"), url("http://libs.useso.com/js/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf?v=#4.0.3") format("truetype"), url("http://libs.useso.com/js/font-awesome/4.2.0/fonts/fontawesome-webfont.svg#fontawesomeregular?v=#4.0.3") format("svg");
+  src: url("http://cdn.bootcss.com/font-awesome/4.2.0/fonts/fontawesome-webfont.eot?v=#4.0.3");
+  src: url("http://cdn.bootcss.com/font-awesome/4.2.0/fonts/fontawesome-webfont.eot?#iefix&v=#4.0.3") format("embedded-opentype"), url("http://cdn.bootcss.com/font-awesome/4.2.0/fonts/fontawesome-webfont.woff?v=#4.0.3") format("woff"), url("http://cdn.bootcss.com/font-awesome/4.2.0/fonts/fontawesome-webfont.ttf?v=#4.0.3") format("truetype"), url("http://cdn.bootcss.com/font-awesome/4.2.0/fonts/fontawesome-webfont.svg#fontawesomeregular?v=#4.0.3") format("svg");
 }
 html,
 body,
