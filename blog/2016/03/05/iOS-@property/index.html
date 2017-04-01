@@ -1,0 +1,472 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>Objective-C的@property的详细解读 | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="property也称属性，是Objective-C中重要的语法。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="Objective-C的@property的详细解读">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2016/03/05/iOS-@property/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="property也称属性，是Objective-C中重要的语法。">
+<meta property="og:updated_time" content="2016-04-20T07:10:56.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="Objective-C的@property的详细解读">
+<meta name="twitter:description" content="property也称属性，是Objective-C中重要的语法。">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-iOS-@property" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2016/03/05/iOS-@property/" class="article-date">
+  <time datetime="2016-03-05T06:54:59.000Z" itemprop="datePublished">2016-03-05</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/iOS/">iOS</a>►<a class="article-category-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      Objective-C的@property的详细解读
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#property的前世今生"><span class="toc-text">@property的前世今生</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#property与-synthesize"><span class="toc-text">@property与@synthesize</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#property与取值、设值方法"><span class="toc-text">@property与取值、设值方法</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#property的特质"><span class="toc-text">@property的特质</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#原子性"><span class="toc-text">原子性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#可读、可写权限"><span class="toc-text">可读、可写权限</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#内存管理方式"><span class="toc-text">内存管理方式</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#setter和getter方法名"><span class="toc-text">setter和getter方法名</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#特别注意"><span class="toc-text">特别注意</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#property与KVO"><span class="toc-text">@property与KVO</span></a></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>@property在Objective-C中，我们称为属性。它与实例变量有密不可分的关系，从而会涉及到内存管理、KVO等诸多细节问题。</p>
+<p>看了很多代码，不少人对使用<code>@property</code>的使用习惯和认识也有一些不合理的地方，所以写这篇文章来谈谈<code>@property</code>的正确使用姿势。</p>
+<p>鄙人水平有限，若文章内容存在错误，欢迎您在评论中指正，我会感激不尽。</p>
+<a id="more"></a>
+<h1 id="property的前世今生"><a href="#property的前世今生" class="headerlink" title="@property的前世今生"></a>@property的前世今生</h1><p>在Java、C++中我们一般都会为实例变量添加访问权限声明<code>@public</code>、<code>@private</code>和<code>@protect</code>，但在Objective-C中，我们通常不会为实例变量添加权限声明的。由于Objective-C是一门动态的语言，允许开发者随时（甚至在运行时）向应用添加实例变量，所以在Objective-C中，没有采用这种方法。</p>
+<p>面向对象思想有一个非常重要的性质，封装性。上述的权限声明正是为了保障封装性而产生的。即对外只公开需要公开的属性和方法，内部隐藏起实现细节和并没有必要对外公开的属性和方法。而为了这个封装性，通常情况下我们还会定义为此定义<code>setter</code>和<code>getter</code>方法。</p>
+<p>@property是一条编译器指令，用于编译器为实例变量自动生成<code>setter</code>和<code>getter</code>方法。通常在Objective-C中，我们会在头文件中将需要暴露出来的实例变量的属性<code>@property</code>给出，不希望暴露的，可将该实例变量的属性<code>@property</code>写在类的实现文件的扩展（extension）中。</p>
+<p>举个栗子：</p>
+<p>这是.h头文件的内容，希望暴露出的属性写在这里，其他类可以通过.语法来访问<code>name</code>和<code>birthday</code>两个属性。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Student</span> : <span class="title">NSObject</span></span></div><div class="line"></div><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *name;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>对于不希望暴露给外界的属性，写在实现文件中，以extension的形式出现。.m实现文件内容如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Student</span> ()</span></div><div class="line"></div><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *girlFriendName;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div><div class="line"></div><div class="line"><span class="class"><span class="keyword">@implementation</span> <span class="title">Student</span></span></div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>这样，我们可以在所有import了.h文件的地方使用<code>name</code>这个字符串，权限类似于C++中的Public；<code>girlFriendName</code>只能在<code>Student</code>类的内部使用，即使是<code>Student</code>的子类也不能使用，权限类似于C++中的Private。</p>
+<h1 id="property与-synthesize"><a href="#property与-synthesize" class="headerlink" title="@property与@synthesize"></a>@property与@synthesize</h1><p>在有些教程中，我们会发现有提到<code>@property</code>与<code>@synthesize</code>要配对使用。然后我们尝试不写<code>@synthesize</code>，于是发现仍能正常执行，甚至正常通过“.”点语法（语法糖）和取值、设值方法来访问实例变量。那么问题来了，<code>@synthesize</code>的意义到底是什么呢？</p>
+<p>查了一下资料，在Xcode 4.0版本之前，确实是不写<code>@synthesize</code>不行，后来版本中的LLVM优化了这个语法，只写<code>@property</code>不写<code>@synthesize</code>也可以自动合成<code>setter</code>和<code>getter</code>方法。自动合成的属性所对应的实例变量名就是属性名在前面加“_”，如果我们不想使用这个实例变量名，就可以使用<code>@synthesize</code>来指定实例变量名字。如<code>@synthesize content = textContent;</code>。但实例变量中使用下划线作为开头，已经成了广大开发者约定俗成的习惯，所以如果没有特殊需求，建议还是遵循规范，不需要写<code>@synthesize</code>，直接声明属性<code>@property</code>。</p>
+<h1 id="property与取值、设值方法"><a href="#property与取值、设值方法" class="headerlink" title="@property与取值、设值方法"></a>@property与取值、设值方法</h1><p>这一块直接举个例子，一目了然地说明：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Student</span> : <span class="title">NSObject</span></span></div><div class="line"></div><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">copy</span>) <span class="built_in">NSString</span> *name;</div><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">strong</span>) <span class="built_in">NSDate</span> *birthday;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>这样一段属性声明，等同于自动合成的结果：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">Student</span> : <span class="title">NSObject</span></span></div><div class="line"></div><div class="line">- (<span class="built_in">NSString</span> *)name;</div><div class="line">- (<span class="built_in">NSDate</span> *)birthday;</div><div class="line">- (<span class="keyword">void</span>)setName:(<span class="built_in">NSString</span> *)name;</div><div class="line">- (<span class="keyword">void</span>)setBirthday:(<span class="built_in">NSDate</span> *)birthday;</div><div class="line"></div><div class="line"><span class="keyword">@end</span></div></pre></td></tr></table></figure>
+<p>关于点语法，其实只是Objective-C提供的语法糖。我们在使用点语法访问属性的时候，其实是调用了取值方法“getter”。</p>
+<h1 id="property的特质"><a href="#property的特质" class="headerlink" title="@property的特质"></a>@property的特质</h1><p>我们在前面的例子里，<code>@property</code>后跟了一个括号，里面写了几个关键字，这几个关键字正是<code>@property</code>的特质。特质规定了自动合成的“setter”与“getter”的具体细节。特质具有四类：原子性、可读可写、内存管理、取设值方法名。</p>
+<h2 id="原子性"><a href="#原子性" class="headerlink" title="原子性"></a>原子性</h2><p>在操作系统的学习中我们了解到，一个操作具有原子性表明这个操作不可分割，即最基本的操作。这关乎到线程是否安全的问题：多个线程可能同时访问一个属性。如果一个属性不具备原子性，就不会使用同步锁。在iOS开发时，我们极大多数情况都用<code>nonatomic</code>非原子性，而在OS X开发时，会使用到<code>atomic</code>原子性。这样做的原因是在iOS中使用同步锁，性能开销较大，在极少数需要加锁保护线程安全的时候，我们还需要更底层的锁机制。</p>
+<h2 id="可读、可写权限"><a href="#可读、可写权限" class="headerlink" title="可读、可写权限"></a>可读、可写权限</h2><p>这个特质有两个选项，<code>readwrite</code>和<code>readonly</code>，分别对应读写权限和只读权限。只读权限编译器并不会合成“setter”。默认情况，该特质为<code>readwrite</code>。</p>
+<h2 id="内存管理方式"><a href="#内存管理方式" class="headerlink" title="内存管理方式"></a>内存管理方式</h2><p>setter方法中赋值的方式，决定了内存管理中引用计数的变化。</p>
+<p>这个特质有非常多的选项，我们依次说明。</p>
+<ul>
+<li><code>assign</code>：只对简单数据类型进行赋值操作。简单数据类型包括<code>NSInteger</code>、<code>CGFloat</code>等。</li>
+<li><code>weak</code>：不对该属性具备拥有关系。此时的setter方法并不会改变对象的引用计数，如果该对象的拥有者全都release了，那么该对象会彻底释放，该weak指针会被置为空<code>nil</code>。</li>
+<li><code>strong</code>：对该属性具备拥有关系。此时的setter方法会retain新的对象，release旧的对象。如果旧的对象之前引用计数为1，那么在这次重新赋值时就会被彻底释放。</li>
+<li><code>copy</code>：在setter中，会把该对象复制一份并赋给该属性。我们说复制有两种，『浅拷贝』和『深拷贝』，『浅拷贝』是指对指针的复制，对象本身的内存区域没有变化，新指针指向的还是原有内存区域；『深拷贝』是指对内存区域存储的数据进行的复制，指针会指向新的内存区域。<strong>特别注意的是，如果是对可变对象的使用<code>copy</code>特质不会改变引用计数，为深拷贝；如果是不可变对象使用<code>copy</code>特质，就是浅拷贝，引用计数++，此时和<code>strong</code>完全相同。通常情况下，我们对可变对象使用<code>copy</code>特质。当类型为<code>NSString</code>时，我们也应该对其加以<code>copy</code>特质，因为setter中的新值可能是一个<code>NSMutableString</code>。</strong></li>
+<li><code>unsafe_unretained</code>：不对该属性具备拥有关系，但和<code>weak</code>的区别在于指针所指向的对象被彻底释放时，该属性的指针不会被置为空<code>nil</code>。</li>
+<li><code>retain</code>：这是以前在MRC内存管理方式下的属性，在setter方法中对新值retain。<strong>ARC中已经弃用！</strong></li>
+</ul>
+<blockquote>
+<p>关于可变对象要使用<code>copy</code>特质：为了保证封装性，setter方法是属性的设值方法，但可变对象可能会在不经过setter方法的情况下，改变自身的值，这样破坏了原有的封装性。所以要对可变对象做copy操作，深拷贝出一份不可变的对象。</p>
+</blockquote>
+<h2 id="setter和getter方法名"><a href="#setter和getter方法名" class="headerlink" title="setter和getter方法名"></a>setter和getter方法名</h2><p>可以通过这个特质来指定取值、设值方法的方法名。</p>
+<p>用法直接举例：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">@property</span> (<span class="keyword">nonatomic</span>, <span class="keyword">assign</span>, <span class="keyword">getter</span> = isOpen) <span class="built_in">BOOL</span> open;</div></pre></td></tr></table></figure>
+<p>setter设值方法用法和上面例子用法相同，只是不太常用。</p>
+<h2 id="特别注意"><a href="#特别注意" class="headerlink" title="特别注意"></a>特别注意</h2><p>这些特质都指明了自动合成取设值方法的诸多细节，如果我们开发者想自己实现取设值方法，必须要遵守<code>@property</code>中声明的特质，否则会造成误会，甚至奇怪的bug。</p>
+<h1 id="property与KVO"><a href="#property与KVO" class="headerlink" title="@property与KVO"></a>@property与KVO</h1><p>KVO全称是Key-Value Observing，是Objective-C语言中的一种核心机制，我们一般翻译为键值观察。至于KVO的实现方式，相信很多人也知道，就是继承该类并重写setter方法，当调用setter方法的时候，通知监听器回调。前文说到了，<code>@property</code>可以自动合成setter，所以这里正是它和KVO之间千丝万缕的关系。</p>
+<p>我们访问变量有几种方式，遵循Objective-C调用方法的方式访问<code>[self variableName]</code>是一种，<code>self.variableName</code>语法糖是一种，直接访问实例变量<code>_variableName</code>也是一种，这三种方式有什么区别呢？</p>
+<ul>
+<li><p>方法调用<code>[self variableName]</code></p>
+<p>如前文所讲，这种方式正是使用了getter方法，通过getter返回值的来访问到实例变量的值，遵循良好的封装性。</p>
+</li>
+<li><p>点语法糖<code>self.variableName</code></p>
+<p>正如它的名字一样，这种方式其实只是一种<a href="https://zh.wikipedia.org/w/index.php?title=语法糖&amp;redirect=no" target="_blank" rel="external">语法糖</a>，其背后根本上还是调用getter方法。</p>
+</li>
+<li><p>直接访问实例变量<code>_variableName</code>不经过取设方法，直接访问实例变量所在内存位置。优点在于不经过方法调用，速度更快。</p>
+</li>
+</ul>
+<p>同样看一下设值的方式呢，也有如下三种： </p>
+<ul>
+<li><p>方法调用<code>[self setVariableName]</code></p>
+<p>使用setter来设值。</p>
+</li>
+<li><p>点语法糖<code>self.variableName = @&quot;talisk&quot;</code></p>
+<p><a href="https://zh.wikipedia.org/w/index.php?title=语法糖&amp;redirect=no" target="_blank" rel="external">语法糖</a>，背后同样是setter方法。</p>
+</li>
+<li><p>直接访问实例变量<code>_variableName = @&quot;talisk&quot;</code></p>
+<p>不经过设值方法，将新值赋给实例变量所在内存区域。优点还是不经过方法调用，速度更快。<strong>然而问题也很明显，用这种方式改变值KVO失效，跳过了setter中内存管理的特质。</strong>比如你给某个字符串赋了mutable可变字符串，若该属性内存管理特质为<code>copy</code>，此时通过setter设值会深拷贝一份不可变字符串，但直接访问该实例变量不通过setter会导致没有拷贝出一份不可变字符串。</p>
+</li>
+</ul>
+<p>对于这样的问题，我们大概可以总结出<strong>最佳使用姿势</strong>：</p>
+<p>在需要设值的地方，我们通过setter设值方法设值；当需要取值的时候，我们采用直接访问实例变量的方式。</p>
+<p>另外要注意，初始化方法中，没有特殊需要，应该尽量直接访问实例变量。</p>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2016/03/05/iOS-@property/" data-id="cj0yx5bjk002gi6jvzow86dx1" class="article-share-link" data-share="baidu" data-title="Objective-C的@property的详细解读">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2016/03/05/iOS-@property/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/property/">property</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/内存管理/">内存管理</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/03/30/iOS-Singleton-ViewController-Performance-optimization/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          iOS单例ViewController与UIImage对象内存优化
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2016/03/03/iOS-SDAutoLayout/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">让你爱上用代码自动布局——SDAutoLayout</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2016/03/05/iOS-@property/" data-title="Objective-C的@property的详细解读" data-url="http://blog.talisk.cn//blog/2016/03/05/iOS-@property/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

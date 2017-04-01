@@ -1,0 +1,641 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>数据库学习笔记-03结构化查询语言SQL | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="数据库原理及应用学习笔记，结构化查询语言SQL。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="数据库学习笔记-03结构化查询语言SQL">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2016/01/08/DB-Learning-04-SQL/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="数据库原理及应用学习笔记，结构化查询语言SQL。">
+<meta property="og:updated_time" content="2016-01-08T06:51:47.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="数据库学习笔记-03结构化查询语言SQL">
+<meta name="twitter:description" content="数据库原理及应用学习笔记，结构化查询语言SQL。">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-DB-Learning-04-SQL" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2016/01/08/DB-Learning-04-SQL/" class="article-date">
+  <time datetime="2016-01-08T06:51:47.000Z" itemprop="datePublished">2016-01-08</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/专业课/">专业课</a>►<a class="article-category-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      数据库学习笔记-03结构化查询语言SQL
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#数据定义"><span class="toc-text">数据定义</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#建表"><span class="toc-text">建表</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#表结构的修改"><span class="toc-text">表结构的修改</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#基本表删除"><span class="toc-text">基本表删除</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#索引"><span class="toc-text">索引</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#建立索引"><span class="toc-text">建立索引</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除索引"><span class="toc-text">删除索引</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据查询"><span class="toc-text">数据查询</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#投影查询"><span class="toc-text">投影查询</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#条件查询"><span class="toc-text">条件查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#部分匹配查询"><span class="toc-text">部分匹配查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#空值查询"><span class="toc-text">空值查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#限定结果返回行数"><span class="toc-text">限定结果返回行数</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#连接查询"><span class="toc-text">连接查询</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#交叉连接（自然连接）查询"><span class="toc-text">交叉连接（自然连接）查询</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内连接查询"><span class="toc-text">内连接查询</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#排序"><span class="toc-text">排序</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#分组及计算查询"><span class="toc-text">分组及计算查询</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#子查询"><span class="toc-text">子查询</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#集合操作"><span class="toc-text">集合操作</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据操作"><span class="toc-text">数据操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#插入数据"><span class="toc-text">插入数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#更新数据"><span class="toc-text">更新数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#删除数据"><span class="toc-text">删除数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#保持数据一致性"><span class="toc-text">保持数据一致性</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#视图"><span class="toc-text">视图</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#数据控制"><span class="toc-text">数据控制</span></a></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>SQL是Structured Query Language的缩写，是数据库的标准主流语言。</p>
+<p>SQL的语言特点是集数据定义、数据查询、数据操纵、数据控制功能于一体，综合、通用、功能强。</p>
+<p>使用SQL有两种方式，一种是联机问答形式，一种是嵌入某种高级程序设计语言的程序中。</p>
+<a id="more"></a>
+<h1 id="数据定义"><a href="#数据定义" class="headerlink" title="数据定义"></a>数据定义</h1><h2 id="建表"><a href="#建表" class="headerlink" title="建表"></a>建表</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> &lt;表名&gt;</div><div class="line">(</div><div class="line">	&lt;列名&gt; &lt;数据类型&gt; &lt;列级完整性约束条件&gt;,</div><div class="line">	&lt;列名&gt; &lt;数据类型&gt; &lt;列级完整性约束条件&gt;,</div><div class="line">	&lt;列名&gt; &lt;数据类型&gt; &lt;列级完整性约束条件&gt;,</div><div class="line">	&lt;表记完整性约束条件&gt;</div><div class="line">)</div></pre></td></tr></table></figure>
+<p><code>&lt;列级完整性约束条件&gt;</code>包括：</p>
+<ol>
+<li><code>PRIMARY KEY</code> 主键约束</li>
+<li><code>UNIQUE</code> 唯一性约束</li>
+<li><code>CHECK</code> 列取值必须符合所设置的条件</li>
+<li><code>DEFAULT</code> 列定义默认值</li>
+<li><code>NOT NULL</code> 指定是否允许空值</li>
+<li><code>FOREIGN KEY</code> 设置外键</li>
+</ol>
+<p>如果完整性约束条件涉及该表的多个属性列（如复合属性组成的主键），应定义在表级上，<code>&lt;表级完整性约束条件&gt;</code>包括：</p>
+<ol>
+<li><code>PRIMARY KEY</code></li>
+<li><code>CHECK</code></li>
+<li><code>FOREIGN KEY</code></li>
+</ol>
+<p>举例建表：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">列名</th>
+<th style="text-align:center">数据类型</th>
+<th style="text-align:center">允许空</th>
+<th style="text-align:center">默认值</th>
+<th style="text-align:center">主键</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">学号</td>
+<td style="text-align:center">varchar(20)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center"></td>
+<td style="text-align:center">主键</td>
+</tr>
+<tr>
+<td style="text-align:center">姓名</td>
+<td style="text-align:center">varchar(20)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">性别</td>
+<td style="text-align:center">varchar(20)</td>
+<td style="text-align:center">✘</td>
+<td style="text-align:center">‘男’</td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">出生日期</td>
+<td style="text-align:center">Smalldatetime</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center"></td>
+<td style="text-align:center"></td>
+</tr>
+<tr>
+<td style="text-align:center">身份证号</td>
+<td style="text-align:center">varchar(20)</td>
+<td style="text-align:center">✔</td>
+<td style="text-align:center"></td>
+</tr>
+</tbody>
+</table>
+<p>代码如下：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">CREATE</span> <span class="keyword">TABLE</span> 学生</div><div class="line">(</div><div class="line">	学号 VARCAHR(<span class="number">20</span>) PRIMARY KRY,</div><div class="line">	姓名 <span class="built_in">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">NOT</span> <span class="literal">NULL</span>,</div><div class="line">	性别 <span class="built_in">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">DEFAULT</span> <span class="string">'男'</span>,</div><div class="line">	出生日期 SMALLDATETIME,</div><div class="line">	身份证号 <span class="built_in">VARCHAR</span>(<span class="number">20</span>) <span class="keyword">UNIQUE</span></div><div class="line">)</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="表结构的修改"><a href="#表结构的修改" class="headerlink" title="表结构的修改"></a>表结构的修改</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">ALTER</span> <span class="keyword">TABLE</span> &lt;表名&gt;</div><div class="line">	<span class="keyword">ADD</span> &lt;列名&gt; &lt;数据类型&gt; &lt;列级完整性约束&gt;</div><div class="line">	<span class="keyword">ALTER</span> <span class="keyword">COLUMN</span> &lt;列名&gt; &lt;数据类型&gt; &lt;列级完整性约束&gt;</div><div class="line">	<span class="keyword">DROP</span> &lt;完整性约束名&gt;</div><div class="line">	<span class="keyword">DROP</span> <span class="keyword">COLUMN</span> &lt;列名&gt;</div></pre></td></tr></table></figure>
+<ol>
+<li><code>ADD</code>子句用于增加新列和新的完整性约束条件。</li>
+<li><code>ALTER COLUMN</code>用于修改列名、数据类型、列级完整性约束条件。</li>
+<li><code>DROP</code>子句用于删除指定的完整性约束条件。</li>
+<li><code>DROP COLUMN</code>子句用于删除指定列。</li>
+</ol>
+<h2 id="基本表删除"><a href="#基本表删除" class="headerlink" title="基本表删除"></a>基本表删除</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">DROP</span> <span class="keyword">TABLE</span> &lt;表名&gt;</div></pre></td></tr></table></figure>
+<h1 id="索引"><a href="#索引" class="headerlink" title="索引"></a>索引</h1><p>索引是为了加速表中数据行的检索而创建的一种分散数据结构。</p>
+<h2 id="建立索引"><a href="#建立索引" class="headerlink" title="建立索引"></a>建立索引</h2><p><strong>在表上建立索引</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">CREATE</span> [索引类别] <span class="keyword">INDEX</span> &lt;索引名&gt; <span class="keyword">ON</span> &lt;表名&gt;</div></pre></td></tr></table></figure>
+<p><strong>在列上建立索引</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">CREATE</span> [索引类别] <span class="keyword">INDEX</span> &lt;索引名&gt; <span class="keyword">ON</span> &lt;表名&gt;(&lt;列名&gt;[<span class="keyword">ASC</span>|<span class="keyword">DESC</span>])</div></pre></td></tr></table></figure>
+<p>索引类别为可选项，包括：<code>UNIQUE</code>、<code>CLUSTERED</code>、<code>NONCLUSTERED</code>。</p>
+<p><code>ASC</code>表明索引按升序排列，<code>DESC</code>表明索引按降序排列。</p>
+<h2 id="删除索引"><a href="#删除索引" class="headerlink" title="删除索引"></a>删除索引</h2><figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">DROP</span> <span class="keyword">INDEX</span> &lt;索引名&gt;</div></pre></td></tr></table></figure>
+<h1 id="数据查询"><a href="#数据查询" class="headerlink" title="数据查询"></a>数据查询</h1><p>对数据的查询是数据库最核心的操作。基本查询语句形式为<code>SELECT-FROM-WHERE</code>。</p>
+<h2 id="投影查询"><a href="#投影查询" class="headerlink" title="投影查询"></a>投影查询</h2><p>最基本的<code>SELECT</code>语句只有两部分，分别要返回的列和这些列源于的表。这叫做投影查询。例如：</p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> &lt;目标列表达式&gt;</div><div class="line"><span class="keyword">FROM</span> &lt;表名或视图名&gt;</div></pre></td></tr></table></figure>
+<p><strong>查询学生姓名及所在院系</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 姓名, 所在院系</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>查询所有学生信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> *</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>去除查询结果的重复值，在列名前指定<code>DISTINCT</code></strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> <span class="keyword">DISTINCT</span> 学分</div><div class="line"><span class="keyword">FROM</span> 课程</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="条件查询"><a href="#条件查询" class="headerlink" title="条件查询"></a>条件查询</h2><p><strong>查询课程号为『c1』，60-100分的学生的姓名和成绩</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 姓名, 成绩</div><div class="line"><span class="keyword">FROM</span> 选课</div><div class="line"><span class="keyword">WHERE</span> 课程号 = <span class="string">'c1'</span></div><div class="line">	<span class="keyword">AND</span>(成绩 <span class="keyword">BETWEEN</span> <span class="number">60</span> <span class="keyword">AND</span> <span class="number">100</span>)</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h3 id="部分匹配查询"><a href="#部分匹配查询" class="headerlink" title="部分匹配查询"></a>部分匹配查询</h3><p>不知道完全精确的值时，用户可以用<code>LIKE</code>或<code>NOT LIKE</code>进行部分匹配查询（模糊查询）。用『%』做多个字符通配符，『_』做一个字符通配符。</p>
+<p><strong>查询计算机学院所有姓赵的学生</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 姓名</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 姓名 <span class="keyword">LIKE</span> <span class="string">'赵%'</span></div><div class="line">	<span class="keyword">AND</span>(所在院系 = <span class="string">'计算机'</span>)</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>查询叫赵某天的人的个人信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> *</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 姓名 <span class="keyword">LIKE</span> <span class="string">'赵_天'</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h3 id="空值查询"><a href="#空值查询" class="headerlink" title="空值查询"></a>空值查询</h3><p>某个字段没有值称为具有空值。</p>
+<p><strong>查询所有没填写家庭住址的同学班级和姓名</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 班级, 姓名</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 家庭住址 <span class="keyword">IS</span> <span class="literal">NULL</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h3 id="限定结果返回行数"><a href="#限定结果返回行数" class="headerlink" title="限定结果返回行数"></a>限定结果返回行数</h3><p>用<code>TOP</code>关键字表明查看前几项，<code>TOP</code>后跟常数或表达式，可选加<code>PERCENT</code>表示百分比。</p>
+<p><strong>查看学生表前百分之20的同学姓名</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> TOP <span class="number">20</span> <span class="keyword">PERCENT</span></div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="连接查询"><a href="#连接查询" class="headerlink" title="连接查询"></a>连接查询</h2><p>通过连接操作，将多个表连接起来，从多个表中查询数据。</p>
+<h3 id="交叉连接（自然连接）查询"><a href="#交叉连接（自然连接）查询" class="headerlink" title="交叉连接（自然连接）查询"></a>交叉连接（自然连接）查询</h3><p>相当于两个基本表的笛卡儿积。交叉连接使用关键字<code>CROSS JOIN</code>。</p>
+<p><strong>查询所有学生选修所有课程的信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> *</div><div class="line"><span class="keyword">FROM</span> 学生 <span class="keyword">CROSS</span> <span class="keyword">JOIN</span> 课程</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h3 id="内连接查询"><a href="#内连接查询" class="headerlink" title="内连接查询"></a>内连接查询</h3><p>通过比较运算符进行基本表内某些列数据的比较操作。</p>
+<p><strong>查询计算机学院分数高于90的所有学生姓名及成绩</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 学生.姓名, 选课.成绩</div><div class="line"><span class="keyword">FROM</span> 学生, 选课</div><div class="line"><span class="keyword">WHERE</span>(学生.学号 = 选课.学号)</div><div class="line">	<span class="keyword">AND</span>(成绩 &gt; <span class="number">90</span>)</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p>如果属性是唯一的，那么可以省略表名前缀。</p>
+<h2 id="排序"><a href="#排序" class="headerlink" title="排序"></a>排序</h2><p>需要对结果进行排序，在<code>SELECT</code>语句中使用<code>ORDER BY</code>子句，后跟列名，升序<code>ASC</code>，降序<code>DESC</code>，默认升序。</p>
+<p><strong>查询选修<code>c1</code>课的同学姓名和成绩，并按成绩降序排列</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 姓名, 成绩</div><div class="line"><span class="keyword">FROM</span> 选课</div><div class="line"><span class="keyword">WHERE</span> 课程号 = <span class="string">'c1'</span></div><div class="line"><span class="keyword">ORDER</span> <span class="keyword">BY</span> 成绩 <span class="keyword">DESC</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="分组及计算查询"><a href="#分组及计算查询" class="headerlink" title="分组及计算查询"></a>分组及计算查询</h2><p>有时需要对基本表中数据按照一定条件进行分组汇总或求平均值，就要在查询语句中与<code>GROUP BY</code>子句一起使用。<code>COUNT</code>、<code>SUM</code>、<code>AVG</code>、<code>MAX</code>、<code>MIN</code>。</p>
+<p><strong>查询各院系学生人数</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 所在院系 <span class="keyword">AS</span> 学院, <span class="keyword">COUNT</span> (*) <span class="keyword">AS</span> 人数</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> 所在院系</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">学院</th>
+<th style="text-align:center">人数</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">计算机科学与技术学院</td>
+<td style="text-align:center">3</td>
+</tr>
+<tr>
+<td style="text-align:center">生命科学学院</td>
+<td style="text-align:center">4</td>
+</tr>
+<tr>
+<td style="text-align:center">城市与环境工程学院</td>
+<td style="text-align:center">5</td>
+</tr>
+</tbody>
+</table>
+<p><strong>查询计算机学院每位学生的平均成绩</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 学号, 姓名, <span class="keyword">AVG</span>(成绩) <span class="keyword">AS</span> 平均成绩</div><div class="line"><span class="keyword">FROM</span> 选课</div><div class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> 学号</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">学号</th>
+<th style="text-align:center">姓名</th>
+<th style="text-align:center">平均成绩</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">2013115010101</td>
+<td style="text-align:center">张一</td>
+<td style="text-align:center">78</td>
+</tr>
+<tr>
+<td style="text-align:center">2013115010102</td>
+<td style="text-align:center">王二</td>
+<td style="text-align:center">67</td>
+</tr>
+<tr>
+<td style="text-align:center">2013115010103</td>
+<td style="text-align:center">李三</td>
+<td style="text-align:center">91</td>
+</tr>
+</tbody>
+</table>
+<p>在分组查询时，需要分组满足某个条件才检索，此时用<code>HAVING</code>子句限定分组。<code>HAVING</code>跟在<code>GROUP BY</code>之后，不能单独使用。</p>
+<p><strong>查询至少选修两门课的每名学生平均成绩</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 学号, <span class="keyword">COUNT</span>(*) <span class="keyword">AS</span> 选课数, <span class="keyword">AVG</span>(成绩) <span class="keyword">AS</span> 平均成绩</div><div class="line"><span class="keyword">FROM</span> 选课</div><div class="line"><span class="keyword">GROUP</span> <span class="keyword">BY</span> 学号</div><div class="line"><span class="keyword">HAVING</span> <span class="keyword">COUNT</span>(*) &gt; <span class="number">1</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p>查询结果：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">学号</th>
+<th style="text-align:center">选课数</th>
+<th style="text-align:center">平均成绩</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">2013115010101</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">78</td>
+</tr>
+<tr>
+<td style="text-align:center">2013115010102</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">69</td>
+</tr>
+<tr>
+<td style="text-align:center">2013115010103</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">91</td>
+</tr>
+</tbody>
+</table>
+<h2 id="子查询"><a href="#子查询" class="headerlink" title="子查询"></a>子查询</h2><p>有时候需要在其他<code>SELECT</code>语句的查询结果之上在进行查询，这里就用到子查询，也称嵌套查询。</p>
+<p>比如<strong>查询出平均成绩高于80分的学生学号和姓名</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 学号, 姓名</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 学号 <span class="keyword">IN</span> (</div><div class="line">	<span class="keyword">SELECT</span> 学号</div><div class="line">	<span class="keyword">FROM</span> 选课</div><div class="line">	<span class="keyword">GROUP</span> <span class="keyword">BY</span> 学号</div><div class="line">	<span class="keyword">HAVING</span> <span class="keyword">AVG</span>(成绩) &gt; <span class="number">80</span></div><div class="line">)</div></pre></td></tr></table></figure>
+<p>使用量词查询，<strong>查询出生科院平均成绩高于计科院最低成绩同学的学生学号和姓名</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">SELECT</span> 学号, 姓名</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 学号 <span class="keyword">IN</span> (</div><div class="line">	<span class="keyword">SELECT</span> 学号</div><div class="line">	<span class="keyword">FROM</span> 选课</div><div class="line">	<span class="keyword">WHERE</span> 成绩 &gt; <span class="keyword">ANY</span> (</div><div class="line">		<span class="keyword">SELECT</span> 成绩</div><div class="line">		<span class="keyword">FROM</span> 选课</div><div class="line">		<span class="keyword">WHERE</span> 学号 <span class="keyword">IN</span> (</div><div class="line">			<span class="keyword">SELECT</span> 学号</div><div class="line">			<span class="keyword">FROM</span> 学生</div><div class="line">			<span class="keyword">WHERE</span> 学院 = <span class="string">'计算机科学与技术学院'</span></div><div class="line">		)</div><div class="line">	)</div><div class="line">)</div><div class="line"><span class="keyword">AND</span> 学院 = <span class="string">'生命科学学院'</span></div></pre></td></tr></table></figure>
+<h2 id="集合操作"><a href="#集合操作" class="headerlink" title="集合操作"></a>集合操作</h2><p>包含交、并、差。只需要在两段<code>SELECT</code>语句之间使用交<code>UNION</code>、并<code>INTERSECT</code>、差<code>EXCEPT</code>即可。</p>
+<h1 id="数据操作"><a href="#数据操作" class="headerlink" title="数据操作"></a>数据操作</h1><p>数据操作功能用来插入<code>INSERT</code>、更新<code>UPDATE</code>、删除<code>DELETE</code>数据库数据的功能。</p>
+<h2 id="插入数据"><a href="#插入数据" class="headerlink" title="插入数据"></a>插入数据</h2><p>插入数据语句用于向数据库表或视图中加入一行数据。</p>
+<p><strong>向学生表插入我的信息</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">INSERT</span> <span class="keyword">INTO</span> 学生</div><div class="line"><span class="keyword">VALUES</span>(<span class="string">'2013115010148'</span>, <span class="string">'孙恺'</span>, <span class="string">'男'</span>)</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="更新数据"><a href="#更新数据" class="headerlink" title="更新数据"></a>更新数据</h2><p>更新数据需要用<code>UPDATE</code>语句与<code>SET</code>子句。</p>
+<p><strong>更新一个元组的值</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">UPDATE</span> 学生</div><div class="line"><span class="keyword">SET</span> 学院 = <span class="string">'计科'</span></div><div class="line"><span class="keyword">WHERE</span> 学号 = <span class="string">'2013115010148'</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>把计科院选了c0课程的学生成绩清零</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">UPDATE</span> 选课</div><div class="line"><span class="keyword">SET</span> 成绩 = <span class="number">0</span></div><div class="line"><span class="keyword">WHERE</span> <span class="string">'学号'</span> <span class="keyword">IN</span> (</div><div class="line">	<span class="keyword">SELECT</span> 学号</div><div class="line">	<span class="keyword">FROM</span> 选课</div><div class="line">	<span class="keyword">WHERE</span> 课程号 = <span class="string">'c0'</span></div><div class="line">)</div><div class="line"><span class="keyword">AND</span> 学院 = <span class="string">'计科'</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="删除数据"><a href="#删除数据" class="headerlink" title="删除数据"></a>删除数据</h2><p><strong>根据学号删除一个学生</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">DELETE</span> <span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 学号 = <span class="string">'2013115010148'</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h2 id="保持数据一致性"><a href="#保持数据一致性" class="headerlink" title="保持数据一致性"></a>保持数据一致性</h2><p>关于一名学生的各种数据可能存在于不同的表中，那么对一个表格的数据进行了修改（删除），则要考虑是否应该删除其他表格中关于记录的数据。</p>
+<h1 id="视图"><a href="#视图" class="headerlink" title="视图"></a>视图</h1><p>视图是一张虚表，从一个或几个基本表中导出的表，视图对应的数据并不实际以视图结构存储在数据库中。</p>
+<p><strong>对学生部分信息建立视图</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">CREATE</span> <span class="keyword">VIEW</span> 学生家庭信息视图 <span class="keyword">AS</span></div><div class="line"><span class="keyword">SELECT</span> 姓名, 出生日期, 家庭住址</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>把学生家庭信息视图修改为计算机女学生学号和姓名</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">ALTER</span> <span class="keyword">VIEW</span> 学生家庭信息视图 <span class="keyword">AS</span></div><div class="line"><span class="keyword">SELECT</span> 学号, 姓名</div><div class="line"><span class="keyword">FROM</span> 学生</div><div class="line"><span class="keyword">WHERE</span> 学院 = <span class="string">'计科院'</span></div><div class="line"><span class="keyword">AND</span> 性别 = <span class="string">'女'</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>视图的删除</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">DROP</span> <span class="keyword">VIEW</span> 学生家庭信息视图</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>视图的更新</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">UPDATE</span> 学生家庭信息视图</div><div class="line"><span class="keyword">SET</span> 姓名 = <span class="string">'李涛'</span></div><div class="line"><span class="keyword">WHERE</span> 学号 = <span class="string">'2013115010148'</span></div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<h1 id="数据控制"><a href="#数据控制" class="headerlink" title="数据控制"></a>数据控制</h1><p><strong>把查询学生表权限授给用户U1</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">GRANT</span> <span class="keyword">SELECT</span> <span class="keyword">ON</span> 学生 <span class="keyword">TO</span> U1</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>把用户U4修改学号的权限收回</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">REVOKE</span> <span class="keyword">UPDATE</span>(学号) <span class="keyword">ON</span> 学生 <span class="keyword">FROM</span> U4</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+<p><strong>拒绝U2和U3用户对课程表进行修改和删除权限</strong></p>
+<figure class="highlight sql"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">DENY <span class="keyword">UPDATE</span>, <span class="keyword">DELETE</span> <span class="keyword">ON</span> 课程 <span class="keyword">TO</span> U2, U3</div><div class="line"><span class="keyword">GO</span></div></pre></td></tr></table></figure>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2016/01/08/DB-Learning-04-SQL/" data-id="cj0yx5bgu001ki6jv9jsgefw4" class="article-share-link" data-share="baidu" data-title="数据库学习笔记-03结构化查询语言SQL">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2016/01/08/DB-Learning-04-SQL/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据库/">数据库</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/13/Conclusion-of-My-Last-Semester/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          对上个学期的总结
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2016/01/07/DB-Learning-03-RDB/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">数据库学习笔记-02关系数据库的基本理论</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2016/01/08/DB-Learning-04-SQL/" data-title="数据库学习笔记-03结构化查询语言SQL" data-url="http://blog.talisk.cn//blog/2016/01/08/DB-Learning-04-SQL/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

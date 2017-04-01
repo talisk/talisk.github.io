@@ -1,0 +1,557 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>C语言模拟实现CPU进程调度 | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="用C实现的模拟处理器进程调度代码。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="C语言模拟实现CPU进程调度">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2015/11/07/CPU-Scheduling-with-C-simulation/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="用C实现的模拟处理器进程调度代码。">
+<meta property="og:updated_time" content="2015-11-07T11:52:55.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="C语言模拟实现CPU进程调度">
+<meta name="twitter:description" content="用C实现的模拟处理器进程调度代码。">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-CPU-Scheduling-with-C-simulation" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2015/11/07/CPU-Scheduling-with-C-simulation/" class="article-date">
+  <time datetime="2015-11-07T11:29:48.000Z" itemprop="datePublished">2015-11-07</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/C-C/">C/C++</a>►<a class="article-category-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      C语言模拟实现CPU进程调度
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#代码"><span class="toc-text">代码</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#实习题目"><span class="toc-text">实习题目</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#提示"><span class="toc-text">提示</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#PCB"><span class="toc-text">PCB</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#确定优先数和运行时间"><span class="toc-text">确定优先数和运行时间</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#按队列排序"><span class="toc-text">按队列排序</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运行操作"><span class="toc-text">运行操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#运行结束后"><span class="toc-text">运行结束后</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#重复运行"><span class="toc-text">重复运行</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#输出和调试"><span class="toc-text">输出和调试</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#启动"><span class="toc-text">启动</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#运行与调试"><span class="toc-text">运行与调试</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#测试数据"><span class="toc-text">测试数据</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行结果"><span class="toc-text">运行结果</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#运行环境"><span class="toc-text">运行环境</span></a></li></ol></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>选择一个调度算法，用C实现的模拟处理器调度。</p>
+<a id="more"></a>
+<h1 id="代码"><a href="#代码" class="headerlink" title="代码"></a>代码</h1><p><a href="https://github.com/talisk/CPUSchedulingSimulation-C/" target="_blank" rel="external">CPUSchedulingSimulation-C​</a></p>
+<h1 id="实习题目"><a href="#实习题目" class="headerlink" title="实习题目"></a>实习题目</h1><p>设计一个按优先数调度算法实现处理器调度的程序。</p>
+<h2 id="提示"><a href="#提示" class="headerlink" title="提示"></a>提示</h2><h3 id="PCB"><a href="#PCB" class="headerlink" title="PCB"></a>PCB</h3><p>假定系统有五个进程，每一个进程用一个进程控制块PCB来代表，进程控制块的格式为：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">进程控制块（PCB）</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">指针</td>
+</tr>
+<tr>
+<td style="text-align:center">要求运行时间</td>
+</tr>
+<tr>
+<td style="text-align:center">优先数</td>
+</tr>
+<tr>
+<td style="text-align:center">状态</td>
+</tr>
+<tr>
+<td style="text-align:center">进程名</td>
+</tr>
+</tbody>
+</table>
+<p>其中，进程名——作为进程的标识，假设五个进程的进程名分别为P1，P2，P3，P4，P5。</p>
+<p>指针——按优先数的大小把五个进程连成队列，用指针指出下一个进程的进程控制块的首地址，最后一个进程中的指针为“0”。</p>
+<p>要求运行时间——假设进程需要运行的单位时间数。</p>
+<p>优先数——赋予进程的优先数，调度时总是选取优先数大的进程先执行。</p>
+<p>状态——可假设有两种状态，“就绪”状态和“结束”状态。五个进程的初始状态都为“就绪”，用“R”表示，当一个进程运行结束后，它的状态为“结束”，用“E”表示。</p>
+<h3 id="确定优先数和运行时间"><a href="#确定优先数和运行时间" class="headerlink" title="确定优先数和运行时间"></a>确定优先数和运行时间</h3><p>在每次运行你所设计的处理器调度程序之前，为每个进程任意确定它的“优先数”和“要求运行时间”。</p>
+<h3 id="按队列排序"><a href="#按队列排序" class="headerlink" title="按队列排序"></a>按队列排序</h3><p>为了调度方便，把五个进程按给定的优先数从大到小连成队列。用一单元指出队首进程，用指针指出队列的连接情况。例：</p>
+<table>
+<thead>
+<tr>
+<th>K1</th>
+<th>P1</th>
+<th>K2</th>
+<th>P2</th>
+<th>K3</th>
+<th>P3</th>
+<th>K4</th>
+<th>P4</th>
+<th>K5</th>
+<th>P5</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td></td>
+<td>0</td>
+<td></td>
+<td>K4</td>
+<td></td>
+<td>K5</td>
+<td></td>
+<td>K3</td>
+<td></td>
+<td>K1</td>
+</tr>
+<tr>
+<td></td>
+<td>2</td>
+<td></td>
+<td>3</td>
+<td></td>
+<td>1</td>
+<td></td>
+<td>2</td>
+<td></td>
+<td>4</td>
+</tr>
+<tr>
+<td></td>
+<td>1</td>
+<td></td>
+<td>5</td>
+<td></td>
+<td>3</td>
+<td></td>
+<td>4</td>
+<td></td>
+<td>2</td>
+</tr>
+<tr>
+<td></td>
+<td>R</td>
+<td></td>
+<td>R</td>
+<td></td>
+<td>R</td>
+<td></td>
+<td>R</td>
+<td></td>
+<td>R</td>
+</tr>
+<tr>
+<td></td>
+<td>PCB1</td>
+<td></td>
+<td>PCB2</td>
+<td></td>
+<td>PCB3</td>
+<td></td>
+<td>PCB4</td>
+<td></td>
+<td>PCB5</td>
+</tr>
+</tbody>
+</table>
+<h3 id="运行操作"><a href="#运行操作" class="headerlink" title="运行操作"></a>运行操作</h3><p>处理器调度总是选队首进程运行。采用动态改变优先数的办法，进程每运行一次优先数就减“1”。由于本实习是模拟处理器调度，所以，对被选中的进程并不实际的启动运行，而是执行：</p>
+<p>优先数-1</p>
+<p>要求运行时间-1</p>
+<p>来模拟进程的一次运行。</p>
+<p>提醒注意的是：在实际的系统中，当一个进程被选中运行时，必须恢复进程的现场，让它占有处理器运行，直到出现等待事件或运行结束。在这里省去了这些工作。</p>
+<h3 id="运行结束后"><a href="#运行结束后" class="headerlink" title="运行结束后"></a>运行结束后</h3><p>进程运行一次后，若要求运行时间0，则再将它加入队列（按优先数大小插入，且置队首标志）；若要求运行时间=0，则把它的状态修改成“结束”（E），且退出队列。</p>
+<h3 id="重复运行"><a href="#重复运行" class="headerlink" title="重复运行"></a>重复运行</h3><p>若“就绪”状态的进程队列不为空，则重复上面（4）和（5）的步骤，直到所有进程都成为“结束”状态。</p>
+<h3 id="输出和调试"><a href="#输出和调试" class="headerlink" title="输出和调试"></a>输出和调试</h3><p>在所设计的程序中应有显示或打印语句，能显示或打印每次被选中进程的进程名以及运行一次后进程队列的变化。</p>
+<h3 id="启动"><a href="#启动" class="headerlink" title="启动"></a>启动</h3><p>为五个进程任意确定一组“优先数”和“要求运行时间”，启动所设计的处理器调度程序，显示或打印逐次被选中进程的进程名以及进程控制块的动态变化过程。</p>
+<h1 id="运行与调试"><a href="#运行与调试" class="headerlink" title="运行与调试"></a>运行与调试</h1><h2 id="测试数据"><a href="#测试数据" class="headerlink" title="测试数据"></a>测试数据</h2><table>
+<thead>
+<tr>
+<th>process1</th>
+<th>process2</th>
+<th>process3</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>3</td>
+<td>2</td>
+<td>4</td>
+</tr>
+<tr>
+<td>5</td>
+<td>1</td>
+<td>3</td>
+</tr>
+<tr>
+<td>R</td>
+<td>R</td>
+<td>R</td>
+</tr>
+</tbody>
+</table>
+<h2 id="运行结果"><a href="#运行结果" class="headerlink" title="运行结果"></a>运行结果</h2><figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div><div class="line">29</div><div class="line">30</div><div class="line">31</div><div class="line">32</div><div class="line">33</div><div class="line">34</div><div class="line">35</div><div class="line">36</div><div class="line">37</div><div class="line">38</div><div class="line">39</div><div class="line">40</div><div class="line">41</div><div class="line">42</div><div class="line">43</div><div class="line">44</div><div class="line">45</div><div class="line">46</div><div class="line">47</div><div class="line">48</div><div class="line">49</div><div class="line">50</div><div class="line">51</div><div class="line">52</div><div class="line">53</div><div class="line">54</div><div class="line">55</div><div class="line">56</div><div class="line">57</div><div class="line">58</div><div class="line">59</div><div class="line">60</div><div class="line">61</div><div class="line">62</div><div class="line">63</div><div class="line">64</div><div class="line">65</div><div class="line">66</div><div class="line">67</div><div class="line">68</div><div class="line">69</div><div class="line">70</div><div class="line">71</div><div class="line">72</div><div class="line">73</div><div class="line">74</div><div class="line">75</div><div class="line">76</div><div class="line">77</div><div class="line">78</div><div class="line">79</div><div class="line">80</div><div class="line">81</div><div class="line">82</div><div class="line">83</div><div class="line">84</div><div class="line">85</div><div class="line">86</div><div class="line">87</div><div class="line">88</div><div class="line">89</div><div class="line">90</div><div class="line">91</div><div class="line">92</div><div class="line">93</div><div class="line">94</div><div class="line">95</div><div class="line">96</div><div class="line">97</div><div class="line">98</div><div class="line">99</div><div class="line">100</div><div class="line">101</div><div class="line">102</div><div class="line">103</div><div class="line">104</div><div class="line">105</div><div class="line">106</div><div class="line">107</div><div class="line">108</div><div class="line">109</div><div class="line">110</div><div class="line">111</div><div class="line">112</div><div class="line">113</div><div class="line">114</div><div class="line">115</div><div class="line">116</div><div class="line">117</div><div class="line">118</div><div class="line">119</div><div class="line">120</div><div class="line">121</div><div class="line">122</div><div class="line">123</div><div class="line">124</div><div class="line">125</div><div class="line">126</div><div class="line">127</div><div class="line">128</div><div class="line">129</div><div class="line">130</div><div class="line">131</div><div class="line">132</div><div class="line">133</div><div class="line">134</div><div class="line">135</div><div class="line">136</div><div class="line">137</div><div class="line">138</div><div class="line">139</div><div class="line">140</div><div class="line">141</div></pre></td><td class="code"><pre><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process1</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process1</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">2</span></div><div class="line"></div><div class="line">Priority:<span class="number">4</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process1</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process1</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">1</span></div><div class="line"></div><div class="line">Priority:<span class="number">3</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process1</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process1</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">0</span></div><div class="line"></div><div class="line">Priority:<span class="number">2</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process3</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process3</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">3</span></div><div class="line"></div><div class="line">Priority:<span class="number">2</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process3</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process3</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">2</span></div><div class="line"></div><div class="line">Priority:<span class="number">1</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process3</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process3</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">1</span></div><div class="line"></div><div class="line">Priority:<span class="number">0</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process2</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process2</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">1</span></div><div class="line"></div><div class="line">Priority:<span class="number">0</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process2</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process2</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">0</span></div><div class="line"></div><div class="line">Priority:<span class="number">-1</span></div><div class="line"></div><div class="line">Status:R</div><div class="line"></div><div class="line"></div><div class="line"></div><div class="line">Now Run ===============</div><div class="line"></div><div class="line">Process process3</div><div class="line"></div><div class="line">Process ===============</div><div class="line"></div><div class="line">Process Name:process3</div><div class="line"></div><div class="line">Rqueired Time:<span class="number">0</span></div><div class="line"></div><div class="line">Priority:<span class="number">-1</span></div><div class="line"></div><div class="line">Status:R</div></pre></td></tr></table></figure>
+<h2 id="运行环境"><a href="#运行环境" class="headerlink" title="运行环境"></a>运行环境</h2><p>Mac OS X 10.11.1</p>
+<p>CLion 1.0</p>
+<p>CMake 3.1.3</p>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2015/11/07/CPU-Scheduling-with-C-simulation/" data-id="cj0yx5bef000pi6jvrxrql69w" class="article-share-link" data-share="baidu" data-title="C语言模拟实现CPU进程调度">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2015/11/07/CPU-Scheduling-with-C-simulation/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/操作系统/">操作系统</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/数据结构/">数据结构</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/算法/">算法</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/17/iOS-Data-Persistence-NSUserDefaults-and-NSKeyedArchiver-Encapsulation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          iOS数据持久化属性列表及对象归档的封装
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">操作系统学习笔记-01处理器管理</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2015/11/07/CPU-Scheduling-with-C-simulation/" data-title="C语言模拟实现CPU进程调度" data-url="http://blog.talisk.cn//blog/2015/11/07/CPU-Scheduling-with-C-simulation/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

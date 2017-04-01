@@ -1,0 +1,549 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>操作系统学习笔记-04设备管理 | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="CS主修重要课程操作系统的学习笔记第四部分，设备管理。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统学习笔记-04设备管理">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2016/01/05/OS-Learning-05-Devices-Manage/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="CS主修重要课程操作系统的学习笔记第四部分，设备管理。">
+<meta property="og:updated_time" content="2016-01-05T02:39:03.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统学习笔记-04设备管理">
+<meta name="twitter:description" content="CS主修重要课程操作系统的学习笔记第四部分，设备管理。">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-OS-Learning-05-Devices-Manage" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2016/01/05/OS-Learning-05-Devices-Manage/" class="article-date">
+  <time datetime="2016-01-05T02:39:03.000Z" itemprop="datePublished">2016-01-05</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/专业课/">专业课</a>►<a class="article-category-link" href="/categories/技术/专业课/操作系统/">操作系统</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      操作系统学习笔记-04设备管理
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#I-O硬件管理"><span class="toc-text">I/O硬件管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O系统"><span class="toc-text">I/O系统</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O操作"><span class="toc-text">I/O操作</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分类"><span class="toc-text">分类</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#I-O控制方式"><span class="toc-text">I/O控制方式</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#轮询方式"><span class="toc-text">轮询方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#中断方式"><span class="toc-text">中断方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#DMA方式"><span class="toc-text">DMA方式</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#通道方式"><span class="toc-text">通道方式</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#缓冲技术"><span class="toc-text">缓冲技术</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#基本思想"><span class="toc-text">基本思想</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#驱动调度技术"><span class="toc-text">驱动调度技术</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#存储设备的物理结构"><span class="toc-text">存储设备的物理结构</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#优化分布"><span class="toc-text">优化分布</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#搜索定位"><span class="toc-text">搜索定位</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#先来先服务算法"><span class="toc-text">先来先服务算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#最短查找时间优先算法"><span class="toc-text">最短查找时间优先算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#扫描算法"><span class="toc-text">扫描算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#分步扫描算法"><span class="toc-text">分步扫描算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#电梯调度算法"><span class="toc-text">电梯调度算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#循环扫描算法"><span class="toc-text">循环扫描算法</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#设备分配方式"><span class="toc-text">设备分配方式</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#SPOOLing设计与实现"><span class="toc-text">SPOOLing设计与实现</span></a></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>现代计算机系统外设分为两大类，一类是存储型设备，另一类是I/O型设备。</p>
+<p>设备管理是操作系统中最为庞杂和琐碎的部分，通常使用I/O中断、缓冲区管理、通道、设备驱动调度等多种技术，克服了由于设备和CPU速度不匹配产生的问题，使设备能和CPU并行工作。另一方面，操作系统把所有设备抽象为文件，便于管理。</p>
+<p>设备管理具有以下功能：设备中断处理、缓冲区管理、设备分配去配、设备驱动调度、虚拟设备。</p>
+<a id="more"></a>
+<h1 id="I-O硬件管理"><a href="#I-O硬件管理" class="headerlink" title="I/O硬件管理"></a>I/O硬件管理</h1><h2 id="I-O系统"><a href="#I-O系统" class="headerlink" title="I/O系统"></a>I/O系统</h2><h3 id="I-O操作"><a href="#I-O操作" class="headerlink" title="I/O操作"></a>I/O操作</h3><p>通常把I/O设备及其接口线路、控制部件、通道和管理软件称为I/O系统，把计算机的内存和设备介质之间的信息传送操作称为I/O操作。</p>
+<h3 id="分类"><a href="#分类" class="headerlink" title="分类"></a>分类</h3><p>按I/O操作特性分为：输入/输出设备、存储型设备。</p>
+<p>按I/O信息交换单位分为：字符设备、块设备。</p>
+<p>输入/输出设备通常是字符设备，交换单位是字节，存储型设备通常是块设备。</p>
+<p>存储型设备又可分为：顺序存取存储设备、直接存取存储设备。</p>
+<h2 id="I-O控制方式"><a href="#I-O控制方式" class="headerlink" title="I/O控制方式"></a>I/O控制方式</h2><h3 id="轮询方式"><a href="#轮询方式" class="headerlink" title="轮询方式"></a>轮询方式</h3><p>又称程序直接控制方式，使用查询指令测试设备控制器的忙先状态位，闲则传输数据，忙则继续查询。如果有多个设备，则轮流查询这些设备忙闲状态。</p>
+<h3 id="中断方式"><a href="#中断方式" class="headerlink" title="中断方式"></a>中断方式</h3><p>要求CPU和设备控制器、设备之间有中断请求线。设备控制器状态寄存器有中断允许位。</p>
+<p>中断方式一般是用于随机出现的服务，并且一旦提出要求，应立即执行。</p>
+<h3 id="DMA方式"><a href="#DMA方式" class="headerlink" title="DMA方式"></a>DMA方式</h3><p>通过DMA控制器完成I/O存取而不占用CPU资源。如果DMA与CPU同时经总线访问内存，CPU总是吧总线占有权让给DMA，这叫做周期窃用，窃取时间通常为一个存取周期。DMA功能还不够强，不能满足复杂的I/O操作要求。大中型计算机中一般使用通道技术。</p>
+<h3 id="通道方式"><a href="#通道方式" class="headerlink" title="通道方式"></a>通道方式</h3><p>通道又称I/O处理器，能完成内存和设备之间的信息传送，与CPU并行工作。通道技术解决了I/O操作独立性和硬部件工作的并行性。</p>
+<h2 id="缓冲技术"><a href="#缓冲技术" class="headerlink" title="缓冲技术"></a>缓冲技术</h2><p>在内存中开辟一个存储区，称为缓冲区，专门用于临时存储I/O操作数据。</p>
+<h3 id="基本思想"><a href="#基本思想" class="headerlink" title="基本思想"></a>基本思想</h3><ul>
+<li>写操作：先申请一个输出缓冲区，数据送到缓冲区，如果是顺序写请求，则不断写入缓冲区直到写满，之后进程继续运行，缓冲区内容写到设备上。</li>
+<li>读操作：先申请一个输入缓冲区，系统把设备一条物理记录读到缓冲区，根据要求把当前所需逻辑记录从缓冲区选出并传送给进程。</li>
+</ul>
+<h1 id="驱动调度技术"><a href="#驱动调度技术" class="headerlink" title="驱动调度技术"></a>驱动调度技术</h1><p>采用一种调度策略，能够按照最佳次序执行要求访问的诸多请求叫做驱动调度。</p>
+<h2 id="存储设备的物理结构"><a href="#存储设备的物理结构" class="headerlink" title="存储设备的物理结构"></a>存储设备的物理结构</h2><p>三个参数：柱面号、磁头号、扇区号。</p>
+<p>磁盘机根据柱面号控制移动臂做横向运动，带动磁头到达指定柱面，缓慢的时间叫做<strong>查找时间</strong>；之后选择磁头，等待被访问扇区旋转到读写磁头下，按扇区号存取信息称为<strong>搜索延迟</strong>。</p>
+<h2 id="优化分布"><a href="#优化分布" class="headerlink" title="优化分布"></a>优化分布</h2><p>磁盘盘片是旋转型设备。假如经常需要处理一一些数据，排列在一个磁道上，盘片旋转一周用20ms时间，处理程序花4ms来处理，那么读每个记录就是2ms。</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">物理块</th>
+<th style="text-align:center">逻辑记录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">A</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">B</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">C</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">D</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">E</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center">F</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:center">G</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:center">H</td>
+</tr>
+<tr>
+<td style="text-align:center">9</td>
+<td style="text-align:center">I</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:center">J</td>
+</tr>
+</tbody>
+</table>
+<p>假设我们要以ABC……顺序读取数据，那么我们在读完A并且处理数据后此时盘片已转到物理块4的位置了，所以我们要把B放在之前D的位置，以此C放在之前G的位置，如下表：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">物理块</th>
+<th style="text-align:center">逻辑记录</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">1</td>
+<td style="text-align:center">A</td>
+</tr>
+<tr>
+<td style="text-align:center">2</td>
+<td style="text-align:center">H</td>
+</tr>
+<tr>
+<td style="text-align:center">3</td>
+<td style="text-align:center">E</td>
+</tr>
+<tr>
+<td style="text-align:center">4</td>
+<td style="text-align:center">B</td>
+</tr>
+<tr>
+<td style="text-align:center">5</td>
+<td style="text-align:center">I</td>
+</tr>
+<tr>
+<td style="text-align:center">6</td>
+<td style="text-align:center">F</td>
+</tr>
+<tr>
+<td style="text-align:center">7</td>
+<td style="text-align:center">C</td>
+</tr>
+<tr>
+<td style="text-align:center">8</td>
+<td style="text-align:center">J</td>
+</tr>
+<tr>
+<td style="text-align:center">9</td>
+<td style="text-align:center">G</td>
+</tr>
+<tr>
+<td style="text-align:center">10</td>
+<td style="text-align:center">D</td>
+</tr>
+</tbody>
+</table>
+<p>处理10条数据总时间为：10ms(旋转到A的平均时间)+10×[2ms(读)+4ms(处理)]=70ms。</p>
+<h2 id="搜索定位"><a href="#搜索定位" class="headerlink" title="搜索定位"></a>搜索定位</h2><p>除旋转延迟外，还有搜查寻道延迟。由于数据请求在不同的柱面上，移动臂要进行移动才能对在不同柱面上的数据进行访问。</p>
+<p>对于移动臂调度算法有若干种，在此我们举例说明，假设磁盘机有200个柱面，请求序列如下：150，30，190，20，100，55，90。移动臂初始位置在50处。</p>
+<h3 id="先来先服务算法"><a href="#先来先服务算法" class="headerlink" title="先来先服务算法"></a>先来先服务算法</h3><p>First In First Out Algorithm，磁盘臂的移动完全按照I/O请求的顺序执行。</p>
+<p>移动臂移动柱面总数为：(150-50)+(150-30)+(190-30)+(190-20)+(100-20)+(100-55)+(90-55)=710。</p>
+<h3 id="最短查找时间优先算法"><a href="#最短查找时间优先算法" class="headerlink" title="最短查找时间优先算法"></a>最短查找时间优先算法</h3><p>Shortest seek time first algorithm，总是先执行查找时间最短的请求。但易产生饥饿现象。</p>
+<p>移动臂移动柱面总数为：(55-50)+(55-30)+(30-20)+(90-20)+(100-90)+(150-100)+(190-150)=210。</p>
+<h3 id="扫描算法"><a href="#扫描算法" class="headerlink" title="扫描算法"></a>扫描算法</h3><p>scan algorithm，移动臂每次沿一个方向移动，扫过所有柱面，遇到I/O请求便进行处理，直到最后一个柱面再反向移动。</p>
+<p>移动臂移动柱面总数为：(55-50)+(90-55)+(100-90)+(150-100)+(190-150)+(199-100)+(199-30)+(30-20)=328。</p>
+<h3 id="分步扫描算法"><a href="#分步扫描算法" class="headerlink" title="分步扫描算法"></a>分步扫描算法</h3><p>在一段时间内进程重复请求访问同一柱面会垄断整个设备，造成移动臂停留不动，称为磁盘粘性。采用分步扫描算法N - steps scan algorithm可避免这个问题。将I/O请求氛围长度为N的子队列，按FIFO算法依次处理每个子队列，每个子队列采用扫描算法，处理完一个再服务下一个子队列，扫描期间新I/O请求放入等待队列中。当N=1时，接近FIFO算法性能。</p>
+<h3 id="电梯调度算法"><a href="#电梯调度算法" class="headerlink" title="电梯调度算法"></a>电梯调度算法</h3><p>elevator algorithm又称LOOK算法，就像电梯一样，错过的不再返回，未访问的按序访问，完成一个方向所有访问请求后，再调头。</p>
+<p>移动臂移动柱面总数为：(55-50)+(90-55)+(100-90)+(150-100)+(190-150)+(190-30)+(30-20)=310。</p>
+<h3 id="循环扫描算法"><a href="#循环扫描算法" class="headerlink" title="循环扫描算法"></a>循环扫描算法</h3><p>在磁盘请求对柱面分布均匀的情况下，当移动臂移动到头转向时靠近磁头一端请求特别少，许多请求分布在另一端，循环扫描算法circular scan algorithm可以克服这个问题。移动臂总是从0号柱面顺序扫描，到头后返回0号，中途不提供服务，构成一个循环。</p>
+<p>移动臂移动柱面总数为：(55-50)+(90-55)+(100-90)+(150-100)+(190-150+(199-190)+(199-0)+(190-30)+(30-20)=310。</p>
+<h1 id="设备分配方式"><a href="#设备分配方式" class="headerlink" title="设备分配方式"></a>设备分配方式</h1><p>设备分配可以可分为静态分配、动态分配和虚拟分配。</p>
+<p>独占性设备往往采用静态分配，作业执行前把所需全部资源分配给它，当作业执行过程中不再需要使用这类设备或作业执行结束将要撤离再收回设备。静态分配实现简单，能防止死锁，但会降低设备利用率。</p>
+<p>在作业执行过程中要求输出一批信息时，系统才把打印机分配给作业，当文件输出要关闭时，系统就收回分配给此作业的打印机。对某些独占使用的设备，动态分配不仅是可行的而且也能提高设备利用率。</p>
+<p>磁盘等，往往可以多作业同时使用，因为速度块、容量大、可直接访问，所以这类设备，主要是驱动调度和实施驱动。</p>
+<h1 id="SPOOLing设计与实现"><a href="#SPOOLing设计与实现" class="headerlink" title="SPOOLing设计与实现"></a>SPOOLing设计与实现</h1><p>系统在磁盘上开辟输入井和输出井，井用作缓冲的存储区域，井的技术可以调节供需矛盾。</p>
+<p>预输入程序把控制信息从输入设备输入到输入井。井管理程序控制从相应输入井读取信息，或把信息送到输出井。</p>
+<p>当处理器空闲，操作系统调用缓输出程序执行缓输出，它查看缓输出表，是否有输出打印文件，并组织信息格式加工等。</p>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2016/01/05/OS-Learning-05-Devices-Manage/" data-id="cj0yx5bgd001ai6jv6i229yeu" class="article-share-link" data-share="baidu" data-title="操作系统学习笔记-04设备管理">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2016/01/05/OS-Learning-05-Devices-Manage/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/操作系统/">操作系统</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/05/OS-Learning-06-File-Manage/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          操作系统学习笔记-05文件管理
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2016/01/03/OS-Learning-04-Storage-Manage/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">操作系统学习笔记-03存储管理</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2016/01/05/OS-Learning-05-Devices-Manage/" data-title="操作系统学习笔记-04设备管理" data-url="http://blog.talisk.cn//blog/2016/01/05/OS-Learning-05-Devices-Manage/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

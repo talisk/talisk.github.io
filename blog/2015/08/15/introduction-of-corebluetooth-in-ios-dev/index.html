@@ -1,0 +1,456 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>iOS蓝牙开发CoreBluetooth快速入门 | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="iOS蓝牙开发CoreBluetooth框架的快速入门介绍和数据收发封装。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="iOS蓝牙开发CoreBluetooth快速入门">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2015/08/15/introduction-of-corebluetooth-in-ios-dev/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="iOS蓝牙开发CoreBluetooth框架的快速入门介绍和数据收发封装。">
+<meta property="og:updated_time" content="2015-11-17T05:33:31.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="iOS蓝牙开发CoreBluetooth快速入门">
+<meta name="twitter:description" content="iOS蓝牙开发CoreBluetooth框架的快速入门介绍和数据收发封装。">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-introduction-of-corebluetooth-in-ios-dev" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2015/08/15/introduction-of-corebluetooth-in-ios-dev/" class="article-date">
+  <time datetime="2015-08-15T07:34:59.000Z" itemprop="datePublished">2015-08-15</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/iOS/">iOS</a>►<a class="article-category-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      iOS蓝牙开发CoreBluetooth快速入门
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#术语解释"><span class="toc-text">术语解释</span></a></li><li class="toc-item toc-level-1"><a class="toc-link" href="#现在开始"><span class="toc-text">现在开始</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#初始化"><span class="toc-text">初始化</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扫描外设"><span class="toc-text">扫描外设</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#连接外设"><span class="toc-text">连接外设</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#连接到外设后"><span class="toc-text">连接到外设后</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#连接失败后"><span class="toc-text">连接失败后</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扫描服务"><span class="toc-text">扫描服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#扫描特征值"><span class="toc-text">扫描特征值</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#设置监听"><span class="toc-text">设置监听</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#数据的转换"><span class="toc-text">数据的转换</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#结语"><span class="toc-text">结语</span></a></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>在iOS开发中，实现蓝牙通信有两种方式，一种是使用传统的GameKit.framework，另一种就是使用在iOS 5中加入的CoreBluetooth.framework。</p>
+<p>利用CoreBluetooth框架，我们可以轻松实现两个iOS设备、iOS设备与非iOS蓝牙设备的交互。要注意的一点是目前这个框架只能支持蓝牙4.0BLE标准，所以对硬件上是有一定要求的，iPhone 4S及以后的设备，第三代iPad及以后的设备是支持这一标准的。</p>
+<a id="more"></a>
+<h1 id="术语解释"><a href="#术语解释" class="headerlink" title="术语解释"></a>术语解释</h1><p>我们首先看一下CoreBluetooth框架的结构。这是CoreBluetooth/CoreBluetooth.h文件中的声明。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div></pre></td><td class="code"><pre><div class="line"><span class="meta">#ifndef _CORE_BLUETOOTH_H_</span></div><div class="line"><span class="meta">#define _CORE_BLUETOOTH_H_</span></div><div class="line"><span class="meta">#endif</span></div><div class="line"></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBCentralManager.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBPeripheralManager.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBPeripheral.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBCentral.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBService.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBCharacteristic.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBDescriptor.h&gt;</span></span></div><div class="line"></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBError.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBUUID.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBAdvertisementData.h&gt;</span></span></div><div class="line"><span class="meta">#import <span class="meta-string">&lt;CoreBluetooth/CBATTRequest.h&gt;</span></span></div></pre></td></tr></table></figure>
+<p>其中，CBCentral开头的都是中心设备类，CBPeripheral开头的都是外设类。这就要讲到蓝牙设备的两个角色了。</p>
+<ul>
+<li>中心设备：中心设备可以理解为是处理数据的iOS设备，比如你的 iPhone、iPad 等。</li>
+<li>外设：外设顾名思义，就是产生数据的外部设备。这个外部设备可以是单片机、嵌入式设备甚至是另一个iOS设备等等。外设可以通过其传感器等产生有用数据，数据后通过蓝牙传给中心设备使用。</li>
+</ul>
+<p>在建立连接的之前，外设向外发出广播数据（advertisementData，官方描述“A dictionary containing any advertisement and scan response data.”），广播数据是一个字典类数据，中心设备可以获取一定范围内的外设发出的广播数据。</p>
+<h1 id="现在开始"><a href="#现在开始" class="headerlink" title="现在开始"></a>现在开始</h1><h2 id="初始化"><a href="#初始化" class="headerlink" title="初始化"></a>初始化</h2><p>为了使用CoreBluetooth框架中的回调方法，我们要使用<code>CBCentralManagerDelegate</code>、<code>CBPeripheralDelegate</code>这两个协议。</p>
+<p>我们先要初始化一个<code>CBCentralManager</code>类的对象。代码如下：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div></pre></td><td class="code"><pre><div class="line"><span class="class"><span class="keyword">@interface</span> <span class="title">SKBluetoothManager</span> : <span class="title">NSObject</span>&lt;<span class="title">CBCentralManagerDelegate</span>, <span class="title">CBPeripheralDelegate</span>&gt;</span>&#123;</div><div class="line">    CBCentralManager *manager;</div><div class="line">    <span class="keyword">id</span>&lt;BTManagerDelegate&gt; delegate;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div></pre></td><td class="code"><pre><div class="line">manager = [[CBCentralManager alloc] initWithDelegate:<span class="keyword">self</span> queue:<span class="literal">nil</span>];</div><div class="line">manager.delegate = <span class="keyword">self</span>;</div></pre></td></tr></table></figure>
+<h2 id="扫描外设"><a href="#扫描外设" class="headerlink" title="扫描外设"></a>扫描外设</h2><p>初始化完成，我们就可以让管理器开始扫描外设了：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[manager scanForPeripheralsWithServices:<span class="literal">nil</span> options:<span class="literal">nil</span>];</div></pre></td></tr></table></figure>
+<p>在设备发现周围外设的advertisementData后，会回调这个方法：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)centralManager:(CBCentralManager *)central didDiscoverPeripheral:(CBPeripheral *)peripheral advertisementData:(<span class="built_in">NSDictionary</span> *)advertisementData RSSI:(<span class="built_in">NSNumber</span> *)RSSI;</div></pre></td></tr></table></figure>
+<p>其中参数central指回调这个方法的中心设备，<code>peripheral</code>指发现的外设对象<code>CBPeripheral</code>，<code>advertisementData</code>就是前面说的字典类型广播数据，<code>RSSI</code>是当前外设的信号强度，单位是dbm。</p>
+<p>刚开始对陌生的蓝牙设备调试时，建议我们先用一个数组NSArray将所扫描到的外设进行保存：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[_peripherals addObject:peripheral];</div></pre></td></tr></table></figure>
+<h2 id="连接外设"><a href="#连接外设" class="headerlink" title="连接外设"></a>连接外设</h2><p>保存后，可根据设备的UUID来确定该设备是否为我们需要进行操作的蓝牙设备，在确认外设身份后，即可发起对外设的连接操作：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">if</span> ([peripheral.identifier.UUIDString isEqualToString:kPeripheralUUID]) &#123;</div><div class="line">    [manager stopScan];</div><div class="line">    [manager connectPeripheral:peripheral options:<span class="literal">nil</span>];</div><div class="line">    <span class="built_in">NSLog</span>(<span class="string">@"连接外设:%@"</span>,peripheral.description);</div><div class="line">    <span class="keyword">self</span>.peripheral = peripheral;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在此步操作后，我们完成了对蓝牙设备的扫描工作，接下来的回调方法分为两种情况：</p>
+<h2 id="连接到外设后"><a href="#连接到外设后" class="headerlink" title="连接到外设后"></a>连接到外设后</h2><figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)centralManager:(CBCentralManager *)central didConnectPeripheral:(CBPeripheral *)peripheral&#123;</div><div class="line">    <span class="built_in">NSLog</span>(<span class="string">@"已经连接到:%@"</span>, peripheral.description);</div><div class="line">    peripheral.delegate = <span class="keyword">self</span>;</div><div class="line">    [central stopScan];</div><div class="line">    [peripheral discoverServices:<span class="literal">nil</span>];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>一旦连接好外设，我们就可以马上停止扫描。然后发起对服务的搜索：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)discoverServices:(<span class="built_in">NSArray</span> *)serviceUUIDs;</div></pre></td></tr></table></figure>
+<p>此处参数位需要扫描的服务的<code>UUID</code>的数组。文档中特别提到，若该参数为<code>nil</code>，将会扫描所有的服务。</p>
+<h2 id="连接失败后"><a href="#连接失败后" class="headerlink" title="连接失败后"></a>连接失败后</h2><p>在连接外设失败的回调方法中，提供了error参数，可根据实际需要来做异常处理，在此不做过多说明</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)centralManager:(CBCentralManager *)central didFailToConnectPeripheral:(CBPeripheral *)peripheral error:(<span class="built_in">NSError</span> *)error &#123;</div><div class="line">    <span class="built_in">NSLog</span>(<span class="string">@"连接%@失败"</span>,peripheral);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在搜索到蓝牙设备的服务后，将会回调</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)peripheral:(CBPeripheral *)peripheral didDiscoverServices:(<span class="built_in">NSError</span> *)error</div></pre></td></tr></table></figure>
+<p>若有错误发生，通过<code>NSError</code>异常处理。</p>
+<h2 id="扫描服务"><a href="#扫描服务" class="headerlink" title="扫描服务"></a>扫描服务</h2><p>由于服务在<code>peripheral</code>里是以<code>NSArray</code>的形式存在的，所以我们要对<code>peripheral</code>中的所有服务进行遍历：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">for</span> (CBService *service <span class="keyword">in</span> peripheral.services) &#123;</div><div class="line">    <span class="comment">//发现服务</span></div><div class="line">    <span class="keyword">if</span> ([service.UUID isEqual:[CBUUID UUIDWithString:kServiceUUID]]) &#123;</div><div class="line">        <span class="built_in">NSLog</span>(<span class="string">@"发现服务:%@"</span>, service.UUID);</div><div class="line">        [peripheral discoverCharacteristics:<span class="literal">nil</span> forService:service];</div><div class="line">        <span class="keyword">break</span>;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="扫描特征值"><a href="#扫描特征值" class="headerlink" title="扫描特征值"></a>扫描特征值</h2><p>在遍历中，趁热打铁，直接对其特征值进行扫描，</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div></pre></td><td class="code"><pre><div class="line">[peripheral discoverCharacteristics:<span class="literal">nil</span> forService:service];</div></pre></td></tr></table></figure>
+<p>这里与扫描<code>service</code>是相同的，若扫描所有的特征值，直接传入nil作为参数即可。</p>
+<p>这里的kServiceUUID是我们根据蓝牙设备的具体情况，提前设置好的UUID常量。本文所有kXxxxxUUID均为预设的UUID常量。</p>
+<p>同样的，characteristics也是一个数组，我们利用像遍历services一样的方式来遍历所有的特征值。</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)peripheral:(CBPeripheral *)peripheral didDiscoverCharacteristicsForService:(CBService *)service error:(<span class="built_in">NSError</span> *)error &#123;</div><div class="line">    <span class="keyword">if</span> (error) &#123;</div><div class="line">        <span class="built_in">NSLog</span>(<span class="string">@"搜索特征%@时发生错误:%@"</span>, service.UUID, [error localizedDescription]);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line">    <span class="built_in">NSLog</span>(<span class="string">@"服务:%@"</span>,service.UUID);</div><div class="line">    <span class="keyword">for</span> (CBCharacteristic *characteristic <span class="keyword">in</span> service.characteristics) &#123;</div><div class="line"><span class="comment">//        NSLog(@"特征:%@",characteristic);</span></div><div class="line">        <span class="comment">//发现特征</span></div><div class="line">        <span class="keyword">if</span> ([characteristic.UUID isEqual:[CBUUID UUIDWithString:kCharacteristicWriteUUID]]) &#123;</div><div class="line">            _writeCharacteristic = characteristic;</div><div class="line">        &#125;</div><div class="line"></div><div class="line">        <span class="keyword">if</span> ([characteristic.UUID isEqual:[CBUUID UUIDWithString:kCharacteristicNotifyUUID]]) &#123;</div><div class="line">            <span class="built_in">NSLog</span>(<span class="string">@"监听特征:%@"</span>,characteristic);<span class="comment">//监听特征</span></div><div class="line">            [<span class="keyword">self</span>.peripheral setNotifyValue:<span class="literal">YES</span> forCharacteristic:characteristic];</div><div class="line">            _isConnected = <span class="literal">YES</span>;</div><div class="line">        &#125;</div><div class="line">    &#125;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>特别要提到的是，我们不同的蓝牙设备有不同的服务和特征值。我的蓝牙模块的说明文档中已经说清楚了，write特征、read特征、notify特征，所以在此根据自身需要，来对不同的特征值进行操作。</p>
+<h2 id="设置监听"><a href="#设置监听" class="headerlink" title="设置监听"></a>设置监听</h2><p>我在此要解释一下，当我们试图去读取蓝牙外设发过来的数据时，一定要找准特征值，用这个方法进行订阅。每次特征值变化的时候，就会有回调方法执行，从而达到读取数据的目的。容易出错误，一定分清楚到底哪个特征值该被订阅。</p>
+<p>在订阅了特征值后，我们尝试用蓝牙外设发送一些数据出来，即可回调下一阶段的方法：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">- (<span class="keyword">void</span>)peripheral:(CBPeripheral *)peripheral didUpdateValueForCharacteristic:(CBCharacteristic *)characteristic error:(<span class="built_in">NSError</span> *)error &#123;</div><div class="line">    <span class="keyword">if</span> (error) &#123;</div><div class="line">        <span class="built_in">NSLog</span>(<span class="string">@"更新特征值%@时发生错误:%@"</span>, characteristic.UUID, [error localizedDescription]);</div><div class="line">        <span class="keyword">return</span>;</div><div class="line">    &#125;</div><div class="line"><span class="comment">// 收到数据</span></div><div class="line">    [delegate didGetDataForString:[<span class="keyword">self</span> hexadecimalString:characteristic.value]];</div><div class="line"><span class="comment">//    NSLog(@"%@",[self hexadecimalString:characteristic.value]);</span></div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<h2 id="数据的转换"><a href="#数据的转换" class="headerlink" title="数据的转换"></a>数据的转换</h2><p>我们接收到的数据，正是<code>characteristic.value</code>，这是一个<code>NSData</code>类数据，我们可以通过<code>UTF8StringEncoding</code>来转化为<code>NSString</code>，为了代码结构清晰，我专门把<code>NSData</code>和<code>NSString</code>互转写成了两个方法：</p>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//将传入的NSData类型转换成NSString并返回</span></div><div class="line">- (<span class="built_in">NSString</span>*)hexadecimalString:(<span class="built_in">NSData</span> *)data&#123;</div><div class="line">    <span class="built_in">NSString</span> *result = [[<span class="built_in">NSString</span> alloc] initWithData:data encoding:<span class="built_in">NSUTF8StringEncoding</span>];</div><div class="line">    <span class="keyword">return</span> result;</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<figure class="highlight objc"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div></pre></td><td class="code"><pre><div class="line"><span class="comment">//将传入的NSString类型转换成NSData并返回</span></div><div class="line">- (<span class="built_in">NSData</span>*)dataWithHexstring:(<span class="built_in">NSString</span> *)hexstring&#123;</div><div class="line">    <span class="built_in">NSData</span> *aData;</div><div class="line">    <span class="keyword">return</span> aData = [hexstring dataUsingEncoding: <span class="built_in">NSASCIIStringEncoding</span>];</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>在拿到字符串后，通过各种回调方法，处理UI变动。</p>
+<h1 id="结语"><a href="#结语" class="headerlink" title="结语"></a>结语</h1><p>整个蓝牙开发实现方便，但回调方法非常多，新手容易晕头转向。按部就班把每个回调方法实现，即可保证蓝牙开发的顺利进行。</p>
+<p>最后贴上我封装的 SKBluetooth 的地址：<a href="https://github.com/talisk/SKBluetooth" title="SKBluetooth" target="_blank" rel="external">SKBluetooth</a></p>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2015/08/15/introduction-of-corebluetooth-in-ios-dev/" data-id="cj0yx5bbo0003i6jv5npx62et" class="article-share-link" data-share="baidu" data-title="iOS蓝牙开发CoreBluetooth快速入门">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2015/08/15/introduction-of-corebluetooth-in-ios-dev/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/蓝牙/">蓝牙</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/08/15/introduction-of-mantle-in-ios-dev/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          利用Mantle库迅速建立数据模型
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2015/08/14/hello-octopress/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">你好</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2015/08/15/introduction-of-corebluetooth-in-ios-dev/" data-title="iOS蓝牙开发CoreBluetooth快速入门" data-url="http://blog.talisk.cn//blog/2015/08/15/introduction-of-corebluetooth-in-ios-dev/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

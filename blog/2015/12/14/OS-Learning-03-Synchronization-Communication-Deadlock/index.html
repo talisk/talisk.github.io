@@ -1,0 +1,516 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>操作系统学习笔记-02同步、通信与死锁 | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="CS主修重要课程操作系统的学习笔记第二部分，同步、通信与死锁。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统学习笔记-02同步、通信与死锁">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2015/12/14/OS-Learning-03-Synchronization-Communication-Deadlock/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="CS主修重要课程操作系统的学习笔记第二部分，同步、通信与死锁。">
+<meta property="og:image" content="http://blog.talisk.cn/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-01.jpg">
+<meta property="og:image" content="http://blog.talisk.cn/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-02.jpg">
+<meta property="og:image" content="http://blog.talisk.cn/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-03.jpg">
+<meta property="og:updated_time" content="2016-01-03T11:55:35.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统学习笔记-02同步、通信与死锁">
+<meta name="twitter:description" content="CS主修重要课程操作系统的学习笔记第二部分，同步、通信与死锁。">
+<meta name="twitter:image" content="http://blog.talisk.cn/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-01.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-OS-Learning-03-Synchronization-Communication-Deadlock" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2015/12/14/OS-Learning-03-Synchronization-Communication-Deadlock/" class="article-date">
+  <time datetime="2015-12-14T12:17:22.000Z" itemprop="datePublished">2015-12-14</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/专业课/">专业课</a>►<a class="article-category-link" href="/categories/技术/专业课/操作系统/">操作系统</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      操作系统学习笔记-02同步、通信与死锁
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#并发进程"><span class="toc-text">并发进程</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#程序的并发执行"><span class="toc-text">程序的并发执行</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#并发进程的特性"><span class="toc-text">并发进程的特性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程的交互：竞争和协作"><span class="toc-text">进程的交互：竞争和协作</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#临界区管理"><span class="toc-text">临界区管理</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#互斥和临界区"><span class="toc-text">互斥和临界区</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#信号量与PV操作"><span class="toc-text">信号量与PV操作</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#同步和同步机制"><span class="toc-text">同步和同步机制</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#信号量与PV操作-1"><span class="toc-text">信号量与PV操作</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#一般信号量"><span class="toc-text">一般信号量</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#信号量实现互斥"><span class="toc-text">信号量实现互斥</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#哲学家吃面问题"><span class="toc-text">哲学家吃面问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#生产者消费者问题"><span class="toc-text">生产者消费者问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#读者写者问题"><span class="toc-text">读者写者问题</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#睡眠理发师问题"><span class="toc-text">睡眠理发师问题</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#死锁"><span class="toc-text">死锁</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#死锁的产生及原因"><span class="toc-text">死锁的产生及原因</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#死锁定义"><span class="toc-text">死锁定义</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#死锁的防止"><span class="toc-text">死锁的防止</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#产生死锁的条件"><span class="toc-text">产生死锁的条件</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#死锁防止策略"><span class="toc-text">死锁防止策略</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#银行家算法"><span class="toc-text">银行家算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#抽象模型"><span class="toc-text">抽象模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#算法描述"><span class="toc-text">算法描述</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#死锁的检测和恢复"><span class="toc-text">死锁的检测和恢复</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#资源分配图和死锁定理"><span class="toc-text">资源分配图和死锁定理</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#死锁检测算法"><span class="toc-text">死锁检测算法</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#死锁的检测和恢复-1"><span class="toc-text">死锁的检测和恢复</span></a></li></ol></li></ol></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>早期人们设计程序，采用顺序执行，在处理器上的执行有严格的顺序，即在一个操作结束后，才进行后面的操作，这称为<strong>程序内部顺序性</strong>；如果计算任务需要多个程序完成，这些程序按照调用次序有序执行，则称为<strong>程序外部顺序性</strong>。顺序程序设计具有如下特性：<strong>执行的顺序性、环境的封闭性、结果的确定性、过程的可再现性。</strong></p>
+<p>操作系统的基本控制和管理都围绕进程展开，最复杂的就是由于支持并发并行机制而引起的。自从操作系统引入并发程序设计技术后，程序的执行不再是顺序的，一个顺序未执行完而另一个程序便已经开始执行了，程序外部的顺序特性小时，程序与计算不再一一对应。</p>
+<p>让程序并发执行能发挥CPU和设备的并行工作能力，从而提高计算机系统效率，一个程序被设计成可与其他程序并发执行，这这程序设计方法成为并发程序设计。</p>
+<p>为协调好进程与进程之间的关系，避免因为同时使用资源而产生冲突，我们就有了锁的机制，即对共同享有的资源互斥使用，这就是这一部分主要讨论的内容。</p>
+<a id="more"></a>
+<h1 id="并发进程"><a href="#并发进程" class="headerlink" title="并发进程"></a>并发进程</h1><h2 id="程序的并发执行"><a href="#程序的并发执行" class="headerlink" title="程序的并发执行"></a>程序的并发执行</h2><p>操作系统的的控制和管理都围绕着进程展开，其中复杂性是由于支持并发并行机制引发的。让程序并发执行能发挥CPU和设备的并行工作能力，从而提高计算机系统的效率。一个程序被设计成可与其他程序并发执行，则这种程序设计方法称为并发程序设计，操作系统应该具有多道程序动态分配资源、调度他们并发执行及协调它们协同工作的能力。</p>
+<h2 id="并发进程的特性"><a href="#并发进程的特性" class="headerlink" title="并发进程的特性"></a>并发进程的特性</h2><p><strong>并发进程可能是无关的，也可能是交互的。</strong> <strong>无关是指分别在不同的变量集合上操作，一个进程执行和其他并发进程进展无关，两者不会影响另一个进程的变量；交互实质并发进程共享某些变量，一个进程执行可能会因想到其他进程的执行结果，且两进程之间存在制约关系。</strong></p>
+<blockquote>
+<p>并发进程的无关性是进程与时间无关的一个充分条件，这一条件在1966年首先由Bernstein提出，称为Bernstein条件。</p>
+</blockquote>
+<p><strong>Bernstein条件简单地说，就是如果两个进程执行过程由数据冲突（Data hazard），那么这两个进程就无法并行执行。</strong></p>
+<ul>
+<li>R(Pi)={a1,a2,…,an}，程序P在执行期间读变量集。</li>
+<li>W(Pi)={b1,b2,…,bm}，程序P在执行期间写变量集。</li>
+</ul>
+<p>若两个进程的R(P)与W(P)集合之间不存在纠葛，说明并发进程执行与时间无关，即这两个进程，爱什么时间并行执行就什么时间并行执行，在时间上重叠也可以，不重叠也可以。</p>
+<p>那么描述这个关系就是R(P1)和W(P2)相交为空，且R(P2)和W(P1)相交为空，且W(P1)和W(P2)相交为空，这就是Bernstein条件。<strong>R(P1)∩W(P2)UR(P1)∩W(P2)UW(P1)∩W(P2)=Ø</strong>。</p>
+<h2 id="进程的交互：竞争和协作"><a href="#进程的交互：竞争和协作" class="headerlink" title="进程的交互：竞争和协作"></a>进程的交互：竞争和协作</h2><p>批处理系统建立多个批处理进程，共享同一套计算机系统资源，使得原本不存在逻辑关系的诸进程因共享资源而产生交互和制约关系，这是间接制约关系，又称互斥关系，操作系统必须协调进程对共享资源的争用。<strong>进程互斥是指若干进程因相互争夺独占性资源而产生的竞争制约关系</strong>。</p>
+<p>一个作业可涉及一组并发进程，为了完成共同任务需要分工协作。<strong>进程同步是指为了完成共同任务的并发进程基于某个条件来协调其活动，因为需要在某些位置上排定执行的先后次序而等待、传递信号或消息所产生的协作制约关系。</strong></p>
+<h1 id="临界区管理"><a href="#临界区管理" class="headerlink" title="临界区管理"></a>临界区管理</h1><h2 id="互斥和临界区"><a href="#互斥和临界区" class="headerlink" title="互斥和临界区"></a>互斥和临界区</h2><p><strong>并发进程中与共享变量有关的程序段称为临界区。</strong></p>
+<p>临界区概念由Dijkstra在1965年首先提出，共享变量的并发进程应遵守临界区调度的三个原则：</p>
+<ol>
+<li>一次至多只有一个进程进入临界区内执行</li>
+<li>如果已有进程在临界区中，试图进入次临界区的其他进程应等待</li>
+<li>进入临界区内的进程应在有限时间内退出，以便让等待队列中的一个进程进入</li>
+</ol>
+<p>由此可总结为三句话：<strong>互斥使用，有空让进；忙则要等，有限等待；择一而入，算法可行。</strong>算法可行是指不能因为调度策略的选择，而导致饥饿、死锁现象。</p>
+<h1 id="信号量与PV操作"><a href="#信号量与PV操作" class="headerlink" title="信号量与PV操作"></a>信号量与PV操作</h1><h2 id="同步和同步机制"><a href="#同步和同步机制" class="headerlink" title="同步和同步机制"></a>同步和同步机制</h2><p>生产者－消费者问题是计算机操作系统中并发进程内在关系的一种抽象，是典型的进程同步问题。生产者进程可以是计算进程、发送进程，消费者进程可以是打印进程、接受进程等等。解决好生产者与消费者的问题就解决了一类并发进程的同步问题。</p>
+<p>我们生产者和消费者之间，建立一个缓冲区，只要缓冲区不满，生产者所生产的产品就可以投入缓冲区，同样，只要缓冲区非空，消费者就可以从缓冲区取走病消耗产品。</p>
+<h2 id="信号量与PV操作-1"><a href="#信号量与PV操作-1" class="headerlink" title="信号量与PV操作"></a>信号量与PV操作</h2><p>在1965年，由Dijkstra提出的同步工具：信号量和PV操作。即将交通管制中多种颜色的信号灯管理方法引入操作系统，让多个进程通过特殊变量展开交互。</p>
+<p>信号量按照用途可以分为两种：公用信号量，也称为互斥信号量，联系一组并发进程，相关进程均可在此信号量上执行PV操作，初值为1，实现进程互斥；私有信号量，联系一组并发进程，仅允许此信号量所拥有的进程执行P操作，而且他相关进程可在其上实行V操作，初值往往为0或正整数，多用于并发进程同步。信号量按照取值分类可分为两种：二值信号量，仅允许为0或1，主要用于解决互斥问题；一般信号量，也成技术信号量，允许取大于1的整数值，主要用于解决同步问题。</p>
+<h3 id="一般信号量"><a href="#一般信号量" class="headerlink" title="一般信号量"></a>一般信号量</h3><p>PV操作的原语描述如下：</p>
+<ol>
+<li>P(s)：将信号量自减1，若小于0，则该进程阻塞，排入与信号量s有关的进程队列中，若结果大于等于0，则继续执行。</li>
+<li>V(s)：将信号量自加1， 若结果小于或等于0，则从队列中释放一个进程，并转为就绪态，若结果大于0，则继续执行该进程。</li>
+</ol>
+<p>记录型信号量和PV操作定义如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">typedef</span> <span class="keyword">struct</span> semaphore &#123;</div><div class="line">  <span class="keyword">int</span> value;</div><div class="line">  <span class="keyword">struct</span> pcb *<span class="built_in">list</span>;</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">P</span><span class="params">(semaphore s)</span> </span>&#123;</div><div class="line">  s.value--;</div><div class="line">  <span class="keyword">if</span>(s.value&lt;<span class="number">0</span>) sleep(s.<span class="built_in">list</span>);</div><div class="line">&#125;</div><div class="line"></div><div class="line"><span class="function"><span class="keyword">void</span> <span class="title">V</span><span class="params">(semaphore s)</span> </span>&#123;</div><div class="line">  s.value++;</div><div class="line">  <span class="keyword">if</span>(s.value&lt;=<span class="number">0</span>) wakeup(s.<span class="built_in">list</span>);</div><div class="line">&#125;</div></pre></td></tr></table></figure>
+<p>由此我们可以得出<strong>三个推论</strong>：</p>
+<ol>
+<li><strong><code>s.value</code>为正数时，正是实际可用物理资源数</strong></li>
+<li><strong><code>s.value</code>为负数时，其绝对值为登记排列在s信号量队列中等待的进程个数</strong></li>
+<li><strong>P操作意味着请求一个资源，V操作意味着释放一个资源，在一定条件下，P操作代表挂起进程操作，V操作代表唤醒被挂起进程的操作。</strong></li>
+</ol>
+<h2 id="信号量实现互斥"><a href="#信号量实现互斥" class="headerlink" title="信号量实现互斥"></a>信号量实现互斥</h2><p>信号量与PV操作可用来解决进程互斥问题，PV操作也可用测试信号量的方法来决定是否进入临界区。用信号量和PV操作管理并发进程互斥进入临界区的一般形式为：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div></pre></td><td class="code"><pre><div class="line">semaphore mutex;</div><div class="line">mutex = <span class="number">1</span>;</div><div class="line"><span class="function">cobegin</span></div><div class="line">  process <span class="title">Pi</span><span class="params">()</span> &#123;</div><div class="line">  	P(mutex);</div><div class="line">  	<span class="comment">// 临界区</span></div><div class="line">  	V(mutex);</div><div class="line">  &#125;</div><div class="line">coend</div></pre></td></tr></table></figure>
+<p>当有进程在临界区的时候，<code>mutex</code>的值为0或负值，否则为1。通过P操作把<code>mutex</code>减至0，这时试图进入临界区的其他进程会因<code>P(mutex)</code>而被迫等待。</p>
+<h2 id="哲学家吃面问题"><a href="#哲学家吃面问题" class="headerlink" title="哲学家吃面问题"></a>哲学家吃面问题</h2><p>通过信号量和PV操作解决操作系统中很经典的五哲学家吃面问题，是进程互斥问题的代表。</p>
+<p><img src="/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-01.jpg" alt="/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-01.jpg"></p>
+<p>如图哲学家坐在桌子旁，每两人间一把叉子，哲学家思考、饥饿、吃面。要吃面，必须拿起两把叉子，并且只能拿身边的两把叉子。这个问题的关键就是叉子需要互斥使用，所以我们可以把叉子设置为互斥量，则由<code>fork[5]={1,1,1,1,1}</code>，即代表有五把分别独立的叉子。信号量与PV操作解决哲学家吃面问题的伪代码如下：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div></pre></td><td class="code"><pre><div class="line">semaphore fork[<span class="number">5</span>];</div><div class="line"><span class="keyword">for</span>(<span class="keyword">int</span> i=<span class="number">0</span>; i&lt;<span class="number">5</span>; i++) fork[i] = <span class="number">1</span>;</div><div class="line"><span class="function">cobegin</span></div><div class="line">  process <span class="title">philosopher_i</span><span class="params">()</span> &#123;		<span class="comment">// </span></div><div class="line">    <span class="keyword">while</span>(<span class="literal">true</span>) &#123;</div><div class="line">      think();					<span class="comment">// 思考。。。</span></div><div class="line">      P(fork[i]);				<span class="comment">// 拿起左叉子</span></div><div class="line">      P(fork[(i + <span class="number">1</span>) % <span class="number">5</span>]);		<span class="comment">// 拿起右叉子</span></div><div class="line">      eat();					<span class="comment">// 吃。。。</span></div><div class="line">      V(fork[i]);				<span class="comment">// 放下左叉子</span></div><div class="line">      V(fork[(i + <span class="number">1</span>) % <span class="number">5</span>]);		<span class="comment">// 放下右叉子</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line">coend</div></pre></td></tr></table></figure>
+<p><strong>这并不是完美方式！！！</strong>这段代码会产生死锁，即当所有哲学家先拿起左边的叉子，再拿起右叉子，此时就会发现没叉子可拿，于是死锁。</p>
+<h2 id="生产者消费者问题"><a href="#生产者消费者问题" class="headerlink" title="生产者消费者问题"></a>生产者消费者问题</h2><p>在协作进程之间，一个进程的执行依赖于协作进程的信号或消息，在尚未得到来自协作进程的信号或消息时则等待，直至信号或消息到达时才被唤醒。</p>
+<p>该类问题是典型的进程同步问题，这些进程必须按照一定的生产率和消费率来访问共享存储区，用PV操作解决生产者和消费者共享单缓冲区的问题，可设置两个信号量，empty和full，empty表示能向缓冲区放产品的个数，full表示能从缓冲区取产品的个数。</p>
+<p>为保证生产者和消费者互斥对缓冲区操作，还需要一个mutex互斥信号，保证同一时刻操作缓冲区的进程唯一。</p>
+<p>这么一来，我们就可以写出如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">semaphore empty = k, full = <span class="number">0</span>;	<span class="comment">// 初始状态，缓冲区为空，容量为k</span></div><div class="line">semaphore mutex = <span class="number">1</span>;			<span class="comment">// 互斥信号量</span></div><div class="line"></div><div class="line"><span class="function">cobegin</span></div><div class="line">  process <span class="title">producer_i</span><span class="params">()</span> &#123;</div><div class="line">  	<span class="keyword">while</span>(<span class="literal">true</span>) &#123;</div><div class="line">      produce();		<span class="comment">// 生产操作</span></div><div class="line">      P(empty);			<span class="comment">// 测试缓冲区是否有空间，占用缓冲区空间</span></div><div class="line">      P(mutex);			<span class="comment">// 对互斥信号做P操作，加锁</span></div><div class="line">      store();			<span class="comment">// 将产品放入缓冲区</span></div><div class="line">      V(mutex);			<span class="comment">// 解锁</span></div><div class="line">      V(full);			<span class="comment">// 修改缓冲区信号量，表明占用缓冲区一个空间</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="function">process <span class="title">consumer_i</span><span class="params">()</span> </span>&#123;</div><div class="line">  	<span class="keyword">while</span>(<span class="literal">true</span>) &#123;</div><div class="line">      P(full);			<span class="comment">// 测试缓冲区是否有产品，取产品</span></div><div class="line">      P(mutex);			<span class="comment">// 对互斥信号做P操作，加锁</span></div><div class="line">      pickup();			<span class="comment">// 取用产品</span></div><div class="line">      V(mutex);			<span class="comment">// 解锁</span></div><div class="line">      V(empty);			<span class="comment">// 修改缓冲区信号量，表明释放缓冲区一个空间</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">coend</div></pre></td></tr></table></figure>
+<p>程序中互斥信号的PV操作<code>P(mutex)</code>和<code>V(mutex)</code>必须成对出现， 两者之间的代码称为临界区。</p>
+<p>施加于<code>empty</code>和<code>full</code>信号量的PV操作也要成对出现，当占用一个空间，占用完成的时候就要标记，同样释放空间后，也要标记。</p>
+<p>如果缓冲区存满了<code>k</code>个产品，此时的<code>empty</code>信号量是0，那么再对<code>empty</code>做P操作，会导致进程等待；同样的，如果缓冲区无产品，此时<code>full</code>信号量为0，消费者要取用产品，对<code>full</code>做P操作，会导致进程等待。</p>
+<p>每个PV操作的顺序都十分重要，因为不当的顺序可能导致死锁。举例，若把<code>P(mutex)</code>放到<code>P(empty)</code>之前执行，则先上锁，之后测试缓冲区是否有空间，若没空间进程等待，此时并没有把<code>mutex</code>解锁，进而其余进程无法执行，导致死锁。在使用信号量和PV操作实现进程同步时，特别要注意P操作的顺序，V操作的顺序无关紧要。通常来说，互斥信号量的P操作后执行。</p>
+<p>另外可以定义两个互斥信号量<code>mutex1</code>和<code>mutex2</code>，分别用于生产者群体和消费者群体的各自互斥，这样可以提升并发行。那么可写出如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div></pre></td><td class="code"><pre><div class="line">semaphore empty = k, full = <span class="number">0</span>;		<span class="comment">// 初始状态，缓冲区为空，容量为k</span></div><div class="line">semaphore mutex1 = <span class="number">1</span>, mutex2 = <span class="number">1</span>;	<span class="comment">// 互斥信号量</span></div><div class="line"></div><div class="line"><span class="function">cobegin</span></div><div class="line">  process <span class="title">producer_i</span><span class="params">()</span> &#123;</div><div class="line">  	<span class="keyword">while</span>(<span class="literal">true</span>) &#123;</div><div class="line">      produce();		<span class="comment">// 生产操作</span></div><div class="line">      P(empty);			<span class="comment">// 测试缓冲区是否有空间，占用缓冲区空间</span></div><div class="line">      P(mutex1);		<span class="comment">// 对生产者互斥信号做P操作，加锁</span></div><div class="line">      store();			<span class="comment">// 将产品放入缓冲区</span></div><div class="line">      V(mutex1);		<span class="comment">// 生产者解锁</span></div><div class="line">      V(full);			<span class="comment">// 修改缓冲区信号量，表明占用缓冲区一个空间</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="function">process <span class="title">consumer_i</span><span class="params">()</span> </span>&#123;</div><div class="line">  	<span class="keyword">while</span>(<span class="literal">true</span>) &#123;</div><div class="line">      P(full);			<span class="comment">// 测试缓冲区是否有产品，取产品</span></div><div class="line">      P(mutex2);		<span class="comment">// 对消费者互斥信号做P操作，加锁</span></div><div class="line">      pickup();			<span class="comment">// 取用产品</span></div><div class="line">      V(mutex2);		<span class="comment">// 消费者解锁</span></div><div class="line">      V(empty);			<span class="comment">// 修改缓冲区信号量，表明释放缓冲区一个空间</span></div><div class="line">    &#125;</div><div class="line">  &#125;</div><div class="line"></div><div class="line">coend</div></pre></td></tr></table></figure>
+<h2 id="读者写者问题"><a href="#读者写者问题" class="headerlink" title="读者写者问题"></a>读者写者问题</h2><p>Reader Writer Problem，经典的并发程序设计问题。共有两组并发进程：读者和写者，共享文件F，要求如下：</p>
+<ol>
+<li>允许多个读者同时读文件。</li>
+<li>同时只允许一个写者对文件写操作。</li>
+<li>任何写者完成写操作前不允许其他读者、写者操作。</li>
+<li>写者执行写操作前，应让已有的写者和读者全部退出。</li>
+</ol>
+<p>由于上述需求，我们需要引入计数器来对读进程计数<code>readcount</code>，写入锁<code>writeblock</code>。分析需求，得出当<code>readcount</code>为0的时候，<code>writeblock</code>做V操作；当<code>readcount</code>为1的时候，<code>writeblock</code>做P操作；我们可写出如下代码：</p>
+<figure class="highlight c"><table><tr><td class="gutter"><pre><div class="line">1</div><div class="line">2</div><div class="line">3</div><div class="line">4</div><div class="line">5</div><div class="line">6</div><div class="line">7</div><div class="line">8</div><div class="line">9</div><div class="line">10</div><div class="line">11</div><div class="line">12</div><div class="line">13</div><div class="line">14</div><div class="line">15</div><div class="line">16</div><div class="line">17</div><div class="line">18</div><div class="line">19</div><div class="line">20</div><div class="line">21</div><div class="line">22</div><div class="line">23</div><div class="line">24</div><div class="line">25</div><div class="line">26</div><div class="line">27</div><div class="line">28</div></pre></td><td class="code"><pre><div class="line"><span class="keyword">int</span> readcount = <span class="number">0</span>;</div><div class="line">semaphore writeblock = <span class="number">1</span>, mutex = <span class="number">1</span>;</div><div class="line"></div><div class="line"><span class="function">cobegin</span></div><div class="line">  process <span class="title">reader_i</span><span class="params">()</span> &#123;</div><div class="line">    P(mutex);				<span class="comment">// 互斥锁加锁</span></div><div class="line">  	readcount++;			<span class="comment">// 读者计数</span></div><div class="line">  	<span class="keyword">if</span>(readcount == <span class="number">1</span>) &#123;	<span class="comment">// 如果是首个读者进入</span></div><div class="line">      P(writeblock);		<span class="comment">// 写入锁加锁</span></div><div class="line">    &#125;</div><div class="line">    V(mutex);				<span class="comment">// 互斥锁解锁</span></div><div class="line"></div><div class="line">  	<span class="comment">// 读文件</span></div><div class="line"></div><div class="line">    P(mutex);				<span class="comment">// 互斥锁加锁</span></div><div class="line">    readcount--;			<span class="comment">// 读者计数</span></div><div class="line">    <span class="keyword">if</span>(readcount == <span class="number">0</span>) &#123;	<span class="comment">// 如果是最后一个读者离开</span></div><div class="line">      V(writeblock);		<span class="comment">// 写入锁解锁</span></div><div class="line">    &#125;</div><div class="line">    V(mutex);				<span class="comment">// 互斥锁解锁</span></div><div class="line">  &#125;</div><div class="line"></div><div class="line">  <span class="function">process <span class="title">writer_j</span><span class="params">()</span> </span>&#123;</div><div class="line">    P(writeblock);</div><div class="line">    <span class="comment">// 写操作</span></div><div class="line">    V(writeblock);</div><div class="line">  &#125;</div><div class="line">coend</div></pre></td></tr></table></figure>
+<p>这段代码存在的问题是，当第一个读者并且未离开的时候，一直可以有新读者进入，而写者只能等待，除非所有读者离开，这就导致了饥饿问题，写者可能无限等待。</p>
+<h2 id="睡眠理发师问题"><a href="#睡眠理发师问题" class="headerlink" title="睡眠理发师问题"></a>睡眠理发师问题</h2><p>// TODO: 睡眠理发师问题</p>
+<h1 id="死锁"><a href="#死锁" class="headerlink" title="死锁"></a>死锁</h1><h2 id="死锁的产生及原因"><a href="#死锁的产生及原因" class="headerlink" title="死锁的产生及原因"></a>死锁的产生及原因</h2><p>当操作系统允许多个进程并发执行时可能出现进程永远被阻塞现象，如两个进程分别等待对方所占有的一个资源，于是两者都不能执行而处于永远等待状态。</p>
+<p>原因有很多，比如进程推进顺序不当，PV操作使用不妥，同类资源分配不均，或对某些资源的使用未加限制。</p>
+<p>产生死锁的因素不仅与系统拥有的资源数量有关，而且与资源分配策略、进程对资源的使用要求以及并发进程的推进顺序有关。</p>
+<h2 id="死锁定义"><a href="#死锁定义" class="headerlink" title="死锁定义"></a>死锁定义</h2><p>如果一个进程集合中的每个进程都在等待中只能由此集合中的其他进程才能引发的事件，而无限期陷入僵持的局面称为死锁。</p>
+<h2 id="死锁的防止"><a href="#死锁的防止" class="headerlink" title="死锁的防止"></a>死锁的防止</h2><h3 id="产生死锁的条件"><a href="#产生死锁的条件" class="headerlink" title="产生死锁的条件"></a>产生死锁的条件</h3><p>系统产生死锁必定同时保持如下四个条件：</p>
+<ul>
+<li>互斥条件（mutual exclusion）：临界资源是独占资源，进程应互斥且排他地使用这些资源。</li>
+<li>占有和等待条件（hold and wait）：进程在请求资源得不到满足而等待时，不释放已有资源。</li>
+<li>不剥夺条件（no preemption）：又称不可抢占，已获资源只能由进程自愿释放，不允许被其他进程剥夺。</li>
+<li>循环等待条件（circular wait）：又称环路条件，存在循环等待链，其中每个进程都在等待链中等待下一个进程所持有的资源，造成这组进程处于永远等待的状态。</li>
+</ul>
+<p>前三个条件是必要不充分条件，第四个条件是前三个条件同时存在所产生的结果，条件并不完全独立。但单独考虑每个条件是有用的，只要能破坏四个必要条件之一，就可以防止死锁。</p>
+<h3 id="死锁防止策略"><a href="#死锁防止策略" class="headerlink" title="死锁防止策略"></a>死锁防止策略</h3><p>破坏互斥条件，可让资源同时被访问，而非互斥使用。</p>
+<p>破坏占有和等待条件，可让进程在请求资源不满足时，释放掉已申请资源。</p>
+<p>破坏不剥夺条件，有两种方法，一是占有资源的进程要申请新资源，需要主动释放已有资源（剥夺式），若仍要占用资源，需向系统申请；二是资源管理程序分配进程时，若资源足够则分配，不够则剥夺其拥有的全部资源，并进入等待资源状态，待充足后再唤醒它重新申请所有资源。</p>
+<p>破坏循环等待条件，采用层次分配策略，把系统中的所有资源排列到不同层次，申请资源时，由底层向高层，每层纸分配一个资源；释放资源时，由高层到底层；当想在本层申请新资源，必须释放掉同层资源才能申请。采用资源有序使用方法，能够有效地破坏循环等待条件。</p>
+<h2 id="银行家算法"><a href="#银行家算法" class="headerlink" title="银行家算法"></a>银行家算法</h2><h3 id="抽象模型"><a href="#抽象模型" class="headerlink" title="抽象模型"></a>抽象模型</h3><p>银行家算法就是把钱看作资源，客户看作进程，银行家看作操作系统。在客户需要贷款的时候要提出最大需求量，银行家若能满足则要满足，在满足了需求并且使用完毕后，客户要还钱。如果当前银行资金不能满足客户需求，则等到银行有钱再给。</p>
+<h3 id="算法描述"><a href="#算法描述" class="headerlink" title="算法描述"></a>算法描述</h3><p>银行家算法又称为资源分配拒绝法。</p>
+<p>基本思想：系统中所有进程进入进程集合，在安全状态下系统收到进程资源请求后，如果资源够则分配给他，然后系统把剩下的可用资源和进程集合中其他进程还需要的资源数做对比，找出生于资源能满足最大需求量的进程，从而保证进程运行完毕并归还全部资源，这是把这个进程从进程集合中删除，归还其所占用的所有资源，系统的声誉资源则更多，反复执行以上步骤，最后检查进程集合，若为空则表明本次申请可行，系统处于安全状态，可以真正实施本次分配，否则只要进程集合非空，系统便处于不安全状态，本次资源分配暂不实施，让申请资源的进程等待。</p>
+<h2 id="死锁的检测和恢复"><a href="#死锁的检测和恢复" class="headerlink" title="死锁的检测和恢复"></a>死锁的检测和恢复</h2><p>系统可以定时运行死锁检测程序，判断系统内是否出现了死锁，如果出现死锁再采取措施解除。</p>
+<h3 id="资源分配图和死锁定理"><a href="#资源分配图和死锁定理" class="headerlink" title="资源分配图和死锁定理"></a>资源分配图和死锁定理</h3><p>资源用方块表示，进程用圆圈表示，用有向边表示进程申请资源和资源分配情况。如图这就是一个资源分配图的例子。</p>
+<p><img src="/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-02.jpg" alt="/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-02.jpg"></p>
+<p>进程－资源分配图里存在环路并不一定发生死锁，因为循环等待资源仅是思索发生的必要条件，而不是充分条件。如下图就是一个有环路而无死锁的例子。</p>
+<p><img src="/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-03.jpg" alt="/illustrations/2015-12-14-OS-Learning-03-Synchronization-Communication-Deadlock-03.jpg"></p>
+<p>P1和P3看似已经无法从R1和R2拿够资源，但实际上P2和P4已经满足了要求，在完成了任务后归还资源，P1和P3能够拿到足够的资源，所以不存在死锁。</p>
+<p>通过以下步骤来执行一个死锁检测：</p>
+<ol>
+<li>如果进程－资源分配图中无环路，则无死锁。</li>
+<li>如果进程－资源分配图中有环路，并且每种资源仅有一个资源，则死锁。此时环路是发生死锁的充要条件，环路中的进程就是死锁进程。</li>
+<li>如果进程－资源分配图中有环路，且所涉及的资源均有多个资源，则环路的存在只是产生死锁的必要条件而不是充分条件，系统不一定发生死锁。</li>
+</ol>
+<p>系统发生死锁状态的充分条件是：当且仅当此状态进程－资源分配图是不可完全简化的，这一充分条件称为死锁定理。</p>
+<h3 id="死锁检测算法"><a href="#死锁检测算法" class="headerlink" title="死锁检测算法"></a>死锁检测算法</h3><p>正是利用银行家算法的思路来分配资源，检测死锁，具体不表。</p>
+<h3 id="死锁的检测和恢复-1"><a href="#死锁的检测和恢复-1" class="headerlink" title="死锁的检测和恢复"></a>死锁的检测和恢复</h3><p>死锁的检测和恢复通常配套使用。死锁被检测到后，恢复方法大致有资源剥夺法、进程回退法、进程撤销法、系统重启法。</p>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2015/12/14/OS-Learning-03-Synchronization-Communication-Deadlock/" data-id="cj0yx5bf4000zi6jvuh064d7y" class="article-share-link" data-share="baidu" data-title="操作系统学习笔记-02同步、通信与死锁">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2015/12/14/OS-Learning-03-Synchronization-Communication-Deadlock/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/操作系统/">操作系统</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2016/01/01/DB-Learning-01-Overview/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          数据库学习笔记-00概览
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2015/12/04/Statistical-code-quantity-by-Terminal/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">利用终端统计代码量</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2015/12/14/OS-Learning-03-Synchronization-Communication-Deadlock/" data-title="操作系统学习笔记-02同步、通信与死锁" data-url="http://blog.talisk.cn//blog/2015/12/14/OS-Learning-03-Synchronization-Communication-Deadlock/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>

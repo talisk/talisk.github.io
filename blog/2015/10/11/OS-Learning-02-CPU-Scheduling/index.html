@@ -1,0 +1,742 @@
+
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  
+  <title>操作系统学习笔记-01处理器管理 | talisk斯温的技术博客</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1">
+  <meta http-equiv="Cache-Control" content="no-transform">
+  <meta name="description" content="CS主修重要课程操作系统的学习笔记第一部分，处理器调度。">
+<meta property="og:type" content="article">
+<meta property="og:title" content="操作系统学习笔记-01处理器管理">
+<meta property="og:url" content="http://blog.talisk.cn/blog/2015/10/11/OS-Learning-02-CPU-Scheduling/index.html">
+<meta property="og:site_name" content="talisk斯温的技术博客">
+<meta property="og:description" content="CS主修重要课程操作系统的学习笔记第一部分，处理器调度。">
+<meta property="og:image" content="http://blog.talisk.cn/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-01.jpg">
+<meta property="og:image" content="http://blog.talisk.cn/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-02.jpg">
+<meta property="og:updated_time" content="2016-01-03T11:55:15.000Z">
+<meta name="twitter:card" content="summary">
+<meta name="twitter:title" content="操作系统学习笔记-01处理器管理">
+<meta name="twitter:description" content="CS主修重要课程操作系统的学习笔记第一部分，处理器调度。">
+<meta name="twitter:image" content="http://blog.talisk.cn/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-01.jpg">
+  
+    <link rel="alternative" href="/atom.xml" title="talisk斯温的技术博客" type="application/atom+xml">
+  
+  
+    <link rel="icon" href="/favicon.png">
+  
+  <link rel="stylesheet" href="/css/style.css">
+  <link href="//fonts.useso.com/css?family=Source+Code+Pro" rel="stylesheet" type="text/css">
+  <!--[if lt IE 9]><script src="//cdnjs.cloudflare.com/ajax/libs/html5shiv/3.7/html5shiv.min.js"></script><![endif]-->
+  
+</head>
+<body>
+<div id="container">
+  <div id="wrap">
+    <header id="header">
+  <div id="banner"></div>
+  <div id="header-outer" class="outer">
+    <div id="header-title" class="inner">
+      <h1 id="logo-wrap">
+        <a href="/" id="logo">talisk斯温的技术博客</a>
+      </h1>
+      
+        <h2 id="subtitle-wrap">
+          <a href="/" id="subtitle">你好，请问需要什么帮助？</a>
+        </h2>
+      
+    </div>
+    <div id="header-inner" class="inner">
+      <nav id="main-nav">
+        <a id="main-nav-toggle" class="nav-icon"></a>
+        
+          <a class="main-nav-link" href="http://www.talisk.cn/">个人主页</a>
+        
+          <a class="main-nav-link" href="/">博客首页</a>
+        
+          <a class="main-nav-link" href="/archives">归档</a>
+        
+          <a class="main-nav-link" href="/about">自述</a>
+        
+          <a class="main-nav-link" href="http://wiki.talisk.cn/">Wiki</a>
+        
+          <a class="main-nav-link" href="/works">作品</a>
+        
+      </nav>
+      <nav id="sub-nav">
+        
+          <a id="nav-rss-link" class="nav-icon" href="/atom.xml" title="RSS Feed"></a>
+        
+        <a id="nav-search-btn" class="nav-icon" title="Search"></a>
+      </nav>
+      <div id="search-form-wrap">
+        <form action="http://www.baidu.com/baidu" method="get" accept-charset="utf-8" class="search-form">
+          <input type="search" name="word" maxlength="20" class="search-form-input" placeholder="Search">
+          <input type="submit" value="" class="search-form-submit">
+          <input name=tn type=hidden value="bds">
+          <input name=cl type=hidden value="3">
+          <input name=ct type=hidden value="2097152">
+          <input type="hidden" name="si" value="blog.talisk.cn">
+        </form>
+      </div>
+    </div>
+  </div>
+</header>
+    <div class="outer">
+      <section id="main"><article id="post-OS-Learning-02-CPU-Scheduling" class="article article-type-post" itemscope itemprop="blogPost">
+  <div class="article-meta">
+    <a href="/blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" class="article-date">
+  <time datetime="2015-10-11T07:51:59.000Z" itemprop="datePublished">2015-10-11</time>
+</a>
+    
+  <div class="article-category">
+    <a class="article-category-link" href="/categories/技术/">技术</a>►<a class="article-category-link" href="/categories/技术/专业课/">专业课</a>►<a class="article-category-link" href="/categories/技术/专业课/操作系统/">操作系统</a>
+  </div>
+
+  </div>
+  <div class="article-inner">
+    
+    
+      <header class="article-header">
+        
+  
+    <h1 class="article-title" itemprop="name">
+      操作系统学习笔记-01处理器管理
+    </h1>
+  
+
+      </header>
+    
+    
+      <div class="entry">
+        
+          <div id="toc" class="toc-article">
+    <div class="toc-title">文章目录</div>
+    <ol class="toc"><li class="toc-item toc-level-1"><a class="toc-link" href="#处理器状态"><span class="toc-text">处理器状态</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#处理器"><span class="toc-text">处理器</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#指令系统（Instruction-System）和寄存器（Register）"><span class="toc-text">指令系统（Instruction System）和寄存器（Register）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#特权指令（Privileged-Instruction）和非特权指令"><span class="toc-text">特权指令（Privileged Instruction）和非特权指令</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内核态（Kernel-Mode）与用户态（User-Mode）"><span class="toc-text">内核态（Kernel Mode）与用户态（User Mode）</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理器状态及其转换"><span class="toc-text">处理器状态及其转换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用户栈和核心栈"><span class="toc-text">用户栈和核心栈</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#程序状态字"><span class="toc-text">程序状态字</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#中断技术"><span class="toc-text">中断技术</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#概念"><span class="toc-text">概念</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#中断原因及中断源分类"><span class="toc-text">中断原因及中断源分类</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#外中断"><span class="toc-text">外中断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#内中断"><span class="toc-text">内中断</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#中断和异常响应及服务"><span class="toc-text">中断和异常响应及服务</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#中断事件处理原则"><span class="toc-text">中断事件处理原则</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#硬件故障中断"><span class="toc-text">硬件故障中断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#程序性中断"><span class="toc-text">程序性中断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#I-O中断"><span class="toc-text">I/O中断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#访管中断"><span class="toc-text">访管中断</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#时钟中断"><span class="toc-text">时钟中断</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#中断优先级和多重中断"><span class="toc-text">中断优先级和多重中断</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#中断优先级"><span class="toc-text">中断优先级</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#中断屏蔽"><span class="toc-text">中断屏蔽</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#多重中断事件处理"><span class="toc-text">多重中断事件处理</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#进程及其实现"><span class="toc-text">进程及其实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#定义和属性"><span class="toc-text">定义和属性</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程状态和转换"><span class="toc-text">进程状态和转换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#三态模型"><span class="toc-text">三态模型</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#七态模型"><span class="toc-text">七态模型</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程的描述和组成"><span class="toc-text">进程的描述和组成</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#进程映像"><span class="toc-text">进程映像</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进程控制块"><span class="toc-text">进程控制块</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#进程队列及其管理"><span class="toc-text">进程队列及其管理</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程上下文切换与处理器状态转换"><span class="toc-text">进程上下文切换与处理器状态转换</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#上下文切换"><span class="toc-text">上下文切换</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#上下文切换时机"><span class="toc-text">上下文切换时机</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#处理器状态转换"><span class="toc-text">处理器状态转换</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#进程控制和管理"><span class="toc-text">进程控制和管理</span></a></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#线程及其实现"><span class="toc-text">线程及其实现</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#引入多线程的目的"><span class="toc-text">引入多线程的目的</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#多线程环境中的进程与线程"><span class="toc-text">多线程环境中的进程与线程</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#多线程"><span class="toc-text">多线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#线程状态"><span class="toc-text">线程状态</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#线程组织"><span class="toc-text">线程组织</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#线程的实现"><span class="toc-text">线程的实现</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#内核级线程"><span class="toc-text">内核级线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#用户级线程"><span class="toc-text">用户级线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#混合式线程"><span class="toc-text">混合式线程</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#线程调度"><span class="toc-text">线程调度</span></a></li></ol></li></ol></li><li class="toc-item toc-level-1"><a class="toc-link" href="#处理器调度"><span class="toc-text">处理器调度</span></a><ol class="toc-child"><li class="toc-item toc-level-2"><a class="toc-link" href="#处理器调度层次"><span class="toc-text">处理器调度层次</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#高级调度"><span class="toc-text">高级调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#中级调度"><span class="toc-text">中级调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#低级调度"><span class="toc-text">低级调度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#选择调度算法的原则"><span class="toc-text">选择调度算法的原则</span></a></li><li class="toc-item toc-level-2"><a class="toc-link" href="#作业管理与调度"><span class="toc-text">作业管理与调度</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#作业与进程的关系"><span class="toc-text">作业与进程的关系</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#作业管理与调度-1"><span class="toc-text">作业管理与调度</span></a></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#低级调度功能和类型"><span class="toc-text">低级调度功能和类型</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#低级调度功能"><span class="toc-text">低级调度功能</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#低级调度用途"><span class="toc-text">低级调度用途</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#低级调度类型"><span class="toc-text">低级调度类型</span></a><ol class="toc-child"><li class="toc-item toc-level-4"><a class="toc-link" href="#剥夺式调度"><span class="toc-text">剥夺式调度</span></a></li><li class="toc-item toc-level-4"><a class="toc-link" href="#非剥夺式调度"><span class="toc-text">非剥夺式调度</span></a></li></ol></li></ol></li><li class="toc-item toc-level-2"><a class="toc-link" href="#作业调度和低级调度算法"><span class="toc-text">作业调度和低级调度算法</span></a><ol class="toc-child"><li class="toc-item toc-level-3"><a class="toc-link" href="#FCFS先来先服务"><span class="toc-text">FCFS先来先服务</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SJF最短作业优先"><span class="toc-text">SJF最短作业优先</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#SRTF最短剩余时间优先"><span class="toc-text">SRTF最短剩余时间优先</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#HRRF最高响应比优先"><span class="toc-text">HRRF最高响应比优先</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#优先级调度"><span class="toc-text">优先级调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#RR轮转调度"><span class="toc-text">RR轮转调度</span></a></li><li class="toc-item toc-level-3"><a class="toc-link" href="#MLFQ多级反馈队列调度"><span class="toc-text">MLFQ多级反馈队列调度</span></a></li></ol></li></ol></li></ol>
+</div>
+        
+      </div>
+    
+    <div class="article-entry" itemprop="articleBody">
+      
+        <p>处理器的管理是操作系统重要的核心组成部分。处理器的管理优劣直接影响系统性能，程序以进程的形式来占用处理器和系统资源，处理器以进程的形式来占用处理器和系统资源，处理器管理中最重要的是处理器调度，即进程调度，也就是控制、协调进程对处理器的竞争。</p>
+<a id="more"></a>
+<p>进程可被调度在一个处理器上交替执行，或者在多处理器上并行执行。为了提高并发粒度和降低并发开销，现代操作系统又引进了线程概念，此时进程仍然是资源分配和管理的单位，线程则成为处理器调度的基本单位。</p>
+<h1 id="处理器状态"><a href="#处理器状态" class="headerlink" title="处理器状态"></a>处理器状态</h1><h2 id="处理器"><a href="#处理器" class="headerlink" title="处理器"></a>处理器</h2><h3 id="指令系统（Instruction-System）和寄存器（Register）"><a href="#指令系统（Instruction-System）和寄存器（Register）" class="headerlink" title="指令系统（Instruction System）和寄存器（Register）"></a>指令系统（Instruction System）和寄存器（Register）</h3><p><strong>计算机的机器指令集合称为指令系统，反映计算机的功能和处理能力。一般处理器的机器指令集是专用的</strong>，指令往往分为数据处理、转移、传送、移位、字符串及I/O等六大类。</p>
+<p>为实现指令功能，处理器中设置了一组寄存器用作寻址或存放数据、变量和中间结果，个数根据处理器型号不同而异。</p>
+<h3 id="特权指令（Privileged-Instruction）和非特权指令"><a href="#特权指令（Privileged-Instruction）和非特权指令" class="headerlink" title="特权指令（Privileged Instruction）和非特权指令"></a>特权指令（Privileged Instruction）和非特权指令</h3><p>由于<strong>操作系统是系统资源的管理者和控制者</strong>，所以常常赋予系统程序较高的特权，可以使用全部的机器指令，<strong>而应用程序权限较低，只能使用指令系统子集（非特权指令）</strong>。在多用户、多任务的计算机系统中特权指令必不可少。    </p>
+<p>常见的特权指令有以下几种:</p>
+<ol>
+<li>有关对I/O设备使用的指令：如启动I/O设备指令、测试I/O设备工作状态和控制I/O设备动作的指令等。</li>
+<li>有关访问程序状态的指令：如对程序状态字（PSW）的指令等。</li>
+<li>存取特殊寄存器指令：如存取中断寄存器、时钟寄存器等指令。</li>
+<li>其他指令。</li>
+</ol>
+<h3 id="内核态（Kernel-Mode）与用户态（User-Mode）"><a href="#内核态（Kernel-Mode）与用户态（User-Mode）" class="headerlink" title="内核态（Kernel Mode）与用户态（User Mode）"></a>内核态（Kernel Mode）与用户态（User Mode）</h3><p><strong>用户态也称为『目态』，内核态也称为『管态』、『系统态』、『特权态』。</strong></p>
+<p>根据执行程序对资源和机器指令的使用权限将处理器设置成两个状态，且至少需要划分为这两种状态。CPU的状态属于程序状态字PSW的一位。</p>
+<p>内核态：<strong>系统程序运行时所处的状态</strong>，可以认为是处理器在运行可信任的系统软件，此时全部机器指令都被允许在处理器上执行，程序可以访问所有内存单元和系统资源，并具有改变处理器状态的能力。</p>
+<p>用户态：<strong>正在运行非可信任的应用程序</strong>，无法执行特权指令，且访问<strong>仅限当前处理器上执行程序所在的地址空间</strong>，这样就能防止操作系统程序受到应用程序的侵害。</p>
+<p><strong>在内核态执行的程序比用户态执行的程序拥有更多的权限去访问内存和执行特权指令</strong>，所以状态位被用来区分可信软件和非可信软件。对资源的需求、时间的紧迫和效率高低等因素决定了什么样的功能在内核态中实现。</p>
+<p>说白了，<strong>凡是牵扯到计算机本体根本运行的事情都应该在内核态下执行，只与用户数据和应用相关的东西则放在用户态执行。另外，对时序要求特别高的事情，也应该在内核态做。</strong></p>
+<h3 id="处理器状态及其转换"><a href="#处理器状态及其转换" class="headerlink" title="处理器状态及其转换"></a>处理器状态及其转换</h3><p><strong>用户态向内核态转换的条件</strong>：</p>
+<ol>
+<li>程序<strong>请求操作系统服务</strong>，执行系统调用。</li>
+<li>程序<strong>运行时产生中断事件</strong>（I/O操作完成），运行程序被中断，转向中断处理程序处理。</li>
+<li>程序<strong>运行时产生异常事件</strong>（程序性中断、目态执行特权指令），运行程序被打断，转向异常处理程序。</li>
+</ol>
+<p>上述三类情况都通过中断机制发生，<strong>中断和异常是用户态转换到内核态仅有的途径</strong>，从用户态转向内核太不存在类似指令或其他方法，否则任何进程都可以轻易转入特权状态。当系统中产生中断或异常，处理器将做出响应并交换程序状态字（PSW）。</p>
+<p><strong>内核态转到用户态的方法是通过加载程序状态字（Load Program Status Word）的特权指令，来实现内核态返回用户态，操作系统转交控制权</strong>。</p>
+<h3 id="用户栈和核心栈"><a href="#用户栈和核心栈" class="headerlink" title="用户栈和核心栈"></a>用户栈和核心栈</h3><p>进程有两个栈，用户栈和核心栈，硬件栈指针仅有一个，随着处理器状态转换进行改变。</p>
+<p>用户栈是用户进程空间中开辟的一块区域，用于<strong>保存应用程序的子程序（函数）间相互调用的参数、返回值、返回点以及子程序的局部变量</strong>。</p>
+<p><strong>核心栈也称为系统栈、内核栈</strong>，是内存中属于操作系统空间的一块区域。用途是：</p>
+<ol>
+<li><strong>保护现场</strong>，嵌套中断被中断程序的现场信息压栈，中断返回时弹出栈。</li>
+<li><strong>保存操作系统程序（函数）间相互调用的参数、返回值、返回点和局部变量</strong>。</li>
+</ol>
+<p>每个进程创建时捆绑一个核心栈，具有可读可写不可执行的属性。核心栈大小有限。</p>
+<h2 id="程序状态字"><a href="#程序状态字" class="headerlink" title="程序状态字"></a>程序状态字</h2><p>操作系统将程序运行时的一组动态信息汇集在一起，称为程序状态字（Program Status Word），并<strong>存放在处理器的一组特殊寄存器里</strong>，以方便系统的控制和管理。</p>
+<p>PSW指示运行程序状态，控制指令执行顺序，并保留和指示与运行程序有关的各种信息，<strong>主要作用是实现程序状态的保护和恢复</strong>。每个程序都有一个PSW，每个处理器都设置一个硬件PSW寄存器，当程序占用处理器时，硬件PSW寄存器被程序PSW占用。不同处理器的特殊寄存器组织方式不同。</p>
+<h1 id="中断技术"><a href="#中断技术" class="headerlink" title="中断技术"></a>中断技术</h1><h2 id="概念"><a href="#概念" class="headerlink" title="概念"></a>概念</h2><p><strong>为了请求系统服务、实现并行工作、处理突发事件、满足实时要求，需要打断处理器的正常工作流，为此提出中断概念。</strong></p>
+<h2 id="中断原因及中断源分类"><a href="#中断原因及中断源分类" class="headerlink" title="中断原因及中断源分类"></a>中断原因及中断源分类</h2><p>由硬件发出或产生的中断称为硬中断，按硬中断事件的来源和实现手段可将中断划分为外中断和内中断。</p>
+<h3 id="外中断"><a href="#外中断" class="headerlink" title="外中断"></a>外中断</h3><p><strong>外中断又称为中断或异步中断</strong>，是指来自处理器之外的中断信号。外中断可分为可屏蔽中断和不可屏蔽中断，各个中断具有不同中断优先级，表示时间的紧急程度，在处理高一级中断时往往会全部或部分屏蔽低级中断。</p>
+<h3 id="内中断"><a href="#内中断" class="headerlink" title="内中断"></a>内中断</h3><p><strong>内中断又称异常（exception）或同步中断</strong>，是指来自处理器内部的中断信号，通常是由于在程序执行过程中，发现与当前指令关联的、不正常的或错误的事件。</p>
+<p>内中断可细分为：</p>
+<ol>
+<li>访管中断，由执行系统调用而引起</li>
+<li>硬件故障中断，如电源失效、奇偶校验错误等</li>
+<li>程序性异常，如非法操作、地址越界等</li>
+</ol>
+<p><strong>内部中断不能被屏蔽</strong>，一旦出现应立即响应并进行处理。外部中断的屏蔽，根据异常处理的需要来设定。</p>
+<p>最初只有外部中断，随着中断适用范围扩大，出现了内中断（异常）。但随着中断和异常的产生原因和处理方式逐渐地增大，中断和异常区分开来，区别如下：</p>
+<ol>
+<li><strong>中断是由当前运行程序无关的中断信号触发的</strong>，系统无法确定中断事件的发生时间，中断与CPU是异步的，CPU对中断的响应完全是被动的。<strong>异常是由CPU控制单元产生的</strong>，源于现行程序执行指令过程中检测到例外，与CPU是同步的，允许指令在执行期间响应异常，而且允许多次响应异常，大部分发生在用户态，内核态唯一发生的异常是缺页异常。</li>
+<li>要求中断被快速处理，以便及时响应其他中断信号，所以<strong>中断处理程序过程中是不能阻塞的</strong>。异常处于被打断的当前进程上下文中，所提供的服务是当前进程所需要的，所以<strong>异常处理程序处理过程中可以阻塞</strong>。</li>
+<li><strong>中断允许发生嵌套，但异常大多是单重的</strong>。异常处理过程中可能会产生中断，中断处理过程绝不会被异常打断。</li>
+</ol>
+<h2 id="中断和异常响应及服务"><a href="#中断和异常响应及服务" class="headerlink" title="中断和异常响应及服务"></a>中断和异常响应及服务</h2><p>中断/异常响应需要顺序执行四个事件：</p>
+<ol>
+<li><strong>发现中断源</strong>。中断未被屏蔽时，硬件发现中断/异常事件，由CPU响应中断/异常请求。发现多个中断源时，根据预定中断优先级先后响应中断请求。</li>
+<li><strong>保护现场</strong>。暂停当前程序，硬件将PSW保存至核心栈，使中断/异常处理程序在运行时不会破坏被有用数据。</li>
+<li><strong>转向中断/异常事件处理程序执行</strong>。处理器状态从用户态转为内核态，中断/异常处理程序开始工作。</li>
+<li><strong>恢复现场</strong>。中断处理结束后，恢复PSW，返回中断点继续执行原程序。当异常处理结束后，返回点会因为异常类型而异，<strong>大部分应用程序指令执行出错时，异常处理会结束进程，不能回到原程序</strong>；如果执行访管指令，则异常处理完成后返回这条访管指令的下一条指令；对于页面故障，异常处理程序结束后会返回发生异常的那条指令重新执行。</li>
+</ol>
+<h2 id="中断事件处理原则"><a href="#中断事件处理原则" class="headerlink" title="中断事件处理原则"></a>中断事件处理原则</h2><h3 id="硬件故障中断"><a href="#硬件故障中断" class="headerlink" title="硬件故障中断"></a>硬件故障中断</h3><p>保护现场，停止设备工作，停止处理器运行，向操作员报告故障并对故障造成的破坏进行估计和恢复。</p>
+<h3 id="程序性中断"><a href="#程序性中断" class="headerlink" title="程序性中断"></a>程序性中断</h3><p>不同用户往往有不同的处理要求，借助于信号机制，操作系统可将所捕获的这类中断事件原封提供给应用程序自行处理。</p>
+<h3 id="I-O中断"><a href="#I-O中断" class="headerlink" title="I/O中断"></a>I/O中断</h3><p>I/O中断情况：</p>
+<ol>
+<li>I/O操作正常结束：设置下一个等待传输的进程为就绪态，使其占用设备或通道，并启动数据传输。</li>
+<li>I/O操作发生故障：先向设备发命令索取状态字，分析故障确切原因，再进行恢复或人工干预。</li>
+<li>I/O操作发生异常：分析情况再操作。</li>
+<li>设备报到或设备结束：有新设备可用或老设备断开，系统修改相应数据。</li>
+</ol>
+<h3 id="访管中断"><a href="#访管中断" class="headerlink" title="访管中断"></a>访管中断</h3><p>由于程序执行了访管指令，当前的程序对系统功能进行了调用，引起了访管中断。访管中断可以看做是机器指令的一种扩充。访管指令包括操作码和访管参数两部分，</p>
+<h3 id="时钟中断"><a href="#时钟中断" class="headerlink" title="时钟中断"></a>时钟中断</h3><p>时钟作为操作系统进行调度工作的重要工具，可用于维护系统日期时间、使分时进程按照时间片轮转、让实时进程定时发送接收控制信号、系统定时唤醒活阻塞进程等等，具体不表。</p>
+<h2 id="中断优先级和多重中断"><a href="#中断优先级和多重中断" class="headerlink" title="中断优先级和多重中断"></a>中断优先级和多重中断</h2><h3 id="中断优先级"><a href="#中断优先级" class="headerlink" title="中断优先级"></a>中断优先级</h3><p>中断是随机发生的。任何时间都有可能同时产生多个中断，对于多个中断的处理，就需要根据中断的紧迫程度来安排中断优先级，以这种方式来在一个时刻处理多个中断。</p>
+<p>响应不同优先级中断的方式为硬件和软件方法。硬件链式排队器负责在高级中断事件发生时，屏蔽掉低级的中断源；软件查询程序根据优先级顺序进行顺序查询，一旦发现有中断请求便停止查询，并转入相应的中断事件处理程序。</p>
+<h3 id="中断屏蔽"><a href="#中断屏蔽" class="headerlink" title="中断屏蔽"></a>中断屏蔽</h3><p>计算机均配置可编程中断控制器，CPU可通过指令设置可编程中断控制器屏蔽码。中断屏蔽禁止CPU响应中断或禁止中断产生。</p>
+<h3 id="多重中断事件处理"><a href="#多重中断事件处理" class="headerlink" title="多重中断事件处理"></a>多重中断事件处理</h3><p>同时产生多个中断，或前一个中断尚未处理又发生了新中断，CPU要暂停正在运行的中断处理程序，转而执行新的中断处理程序，称为多重中断或中断嵌套。</p>
+<p>通常高优先级中断具有打断低优先级中断处理程序的权利。</p>
+<p>处理多重中断通常有以下三个方式：</p>
+<ol>
+<li>串行处理：运行一个中断处理程序时屏蔽其他所有中断。</li>
+<li>嵌套处理：在低优先级中断处理程序运行时产生高优先级中断，此时保护低优先级中断处理程序现场，转向处理高优先级中断。</li>
+<li>即时处理：在运行中断处理程序时，立即对新的中断做处理。</li>
+</ol>
+<h1 id="进程及其实现"><a href="#进程及其实现" class="headerlink" title="进程及其实现"></a>进程及其实现</h1><p>引入进程概念的目的：</p>
+<ol>
+<li><strong>刻画程序的并发性</strong>。在多道程序环境下，程序并发执行，程序执行不是连续的而是走走停停的。同时程序并发执行会引发资源共享和竞争，造成各个程序之间存在制约关系。进程是并发程序设计的一种有力工具，操作系统中引入进程概念能较好地刻画系统内部程序的并发执行，提高系统利用率。</li>
+<li>解决资源的共享性。<strong>“可再入”程序概念：能够被多个程序同时调用的程序；“可再用”程序概念：在被调用过程中可以有自身修改，在调用它的程序退出之前不允许其他程序来调用。</strong>“可再入”程序只是纯代码，在执行过程中不被修改，调用它的各个应用程序提供工作区。所以”可再入“程序可同时被多个应用程序调用。</li>
+</ol>
+<h2 id="定义和属性"><a href="#定义和属性" class="headerlink" title="定义和属性"></a>定义和属性</h2><ul>
+<li>定义：<strong>具有独立功能的程序在某个数据集合上的一次运行活动，也是操作系统进行资源分配和保护的基本单位</strong>。</li>
+</ul>
+<ul>
+<li>属性：<ol>
+<li>动态性。进程是程序在数据集合上的一次执行过程，是动态概念，同时具有生命周期，由创建而产生、由调度而执行，由事件而等待、由撤销而消亡。</li>
+<li>共享性。同一程序同时运行于不同数据集合上构成不同进程。多个不同进程可执行相同程序。进程不与程序一一对应。</li>
+<li>独立性。每个进程是操作系统中的一个独立实体，有自己的虚存空间、程序计数器和内部状态。</li>
+<li>制约性。进程因共享资源或协同工作产生相互制约关系，造成进程执行速度的不可预测性，必须对进程的执行次序或相对执行速度加以协调。</li>
+<li>并发性。多个进程的执行在时间上可以重叠，在单处理器系统中可以并发执行；在多处理环境中可以并发执行。因此进程执行可以被打断，或者说可能会在某条指令执行结束被迫让出处理器。</li>
+</ol>
+</li>
+</ul>
+<h2 id="进程状态和转换"><a href="#进程状态和转换" class="headerlink" title="进程状态和转换"></a>进程状态和转换</h2><h3 id="三态模型"><a href="#三态模型" class="headerlink" title="三态模型"></a>三态模型</h3><p>为了便于系统管理，按照进程在执行过程中的不同情况至少要定义三个状态：</p>
+<ol>
+<li><strong>运行态</strong>：进程占有处理器正在运行的状态。</li>
+<li><strong>就绪态</strong>：进程具备运行条件，等待系统分配处理器以便运行的状态。</li>
+<li><strong>等待态</strong>：<strong>又称阻塞态或睡眠态，进程不具备运行条件，正在等待某个事件完成的状态</strong>。</li>
+</ol>
+<p><img src="/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-01.jpg" alt="/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-01.jpg"></p>
+<blockquote>
+<p>处于运行态的进程个数不能大于处理器个数，处于就绪态和等待态的进程可有多个。通常情况下，进程被创建后处于就绪态。</p>
+</blockquote>
+<h3 id="七态模型"><a href="#七态模型" class="headerlink" title="七态模型"></a>七态模型</h3><p><strong>很多系统中增加了新建态和终止态</strong>。</p>
+<p>除此之外，可能有这样一种情况，由于不断创建进程，当系统资源尤其是是内存资源已经不能满足进程运行的要求时，必须要把某些进程<strong>挂起（suspend），对换到磁盘兑换区中，释放它占有的某些资源</strong>。除了内存不足，也可能因为系统出现故障、用户需要等等原因导致进程挂起。</p>
+<p>具有七种状态的示意图如下，两个新的状态位挂起就绪态和挂起等待态。不同的操作系统，对状态的设置有所不同。</p>
+<p><img src="/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-02.jpg" alt="/illustrations/2015-10-14-OS-Learning-02-CPU-Scheduling-02.jpg"></p>
+<h2 id="进程的描述和组成"><a href="#进程的描述和组成" class="headerlink" title="进程的描述和组成"></a>进程的描述和组成</h2><h3 id="进程映像"><a href="#进程映像" class="headerlink" title="进程映像"></a>进程映像</h3><p>由于进程状态在不断发生变化，某时刻进程的内容及其状态集合成为进程映像（process image），包括：进程控制块、进程程序快、进程核心栈、进程数据块。</p>
+<h3 id="进程控制块"><a href="#进程控制块" class="headerlink" title="进程控制块"></a>进程控制块</h3><p><strong>每个进程有且只有一个进程控制块</strong>（Process Control Block, PCB），也称进程描述符，是操作系统用来记录和刻画进程状态及环境信息的数据结构，是进程动态特征的汇集，是操作系统掌握进程的唯一资料结构和管理依据。通常包含以下信息：标识信息、现场信息、控制信息等。</p>
+<h3 id="进程队列及其管理"><a href="#进程队列及其管理" class="headerlink" title="进程队列及其管理"></a>进程队列及其管理</h3><p>并发系统中同时存在很多进程，通常情况下，把相同状态的所有进程PCB连接在一起的数据结构称为进程队列，方式有：链接方式和索引方式两种。</p>
+<h2 id="进程上下文切换与处理器状态转换"><a href="#进程上下文切换与处理器状态转换" class="headerlink" title="进程上下文切换与处理器状态转换"></a>进程上下文切换与处理器状态转换</h2><h3 id="上下文切换"><a href="#上下文切换" class="headerlink" title="上下文切换"></a>上下文切换</h3><p>多任务系统中，上下文切换是指CPU的控制权由运行任务，转移到另外一个就绪任务时所发生的事件。进程切换必定在内核态而非用户态发生。</p>
+<p>CPU切换到另一个进程需要保存当前进程的状态并恢复另一个进程的状态：当前运行任务转为就绪（或者挂起、删除）状态，另一个被选定的就绪任务成为当前任务。上下文切换包括保存当前任务的运行环境，恢复将要运行任务的运行环境。</p>
+<h3 id="上下文切换时机"><a href="#上下文切换时机" class="headerlink" title="上下文切换时机"></a>上下文切换时机</h3><p>由于种种情况，如在中断处理程序运行期间发生一个更高优先级的I/O中断等，会导致发生重新调度事件、执行调度程序和进程上下文切换工作不能连续进行。所以上下文切换时机是比较讲究的。在此不细说了。</p>
+<h3 id="处理器状态转换"><a href="#处理器状态转换" class="headerlink" title="处理器状态转换"></a>处理器状态转换</h3><p>与进程上下文切换有关的是用户态和内核态之间的处理器状态转换，此时仍然在同一个进程中运行。当发生中断、系统调用时暂停正在运行的进程，处理器从用户态转为内核态，执行操作系统命令，这就是一次状态转换，此时的进程仍然在自己的上下文执行，只处理器状态变化。</p>
+<p>过程大致为：保存现场、处理器状态转换、若处理中断则设置中断屏蔽、根据系统调用号和中断号找到系统服务程序或中断处理程序地址。</p>
+<h2 id="进程控制和管理"><a href="#进程控制和管理" class="headerlink" title="进程控制和管理"></a>进程控制和管理</h2><p><strong>对进程的控制和管理均由原语实现</strong>。</p>
+<h1 id="线程及其实现"><a href="#线程及其实现" class="headerlink" title="线程及其实现"></a>线程及其实现</h1><h2 id="引入多线程的目的"><a href="#引入多线程的目的" class="headerlink" title="引入多线程的目的"></a>引入多线程的目的</h2><p>目的：<strong>为了减少程序并发执行时所付出的时空开销，使得并发粒度更细、并发性更好。</strong></p>
+<p>思路：<strong>把进程的“独立分配资源”和“被调度分派执行”两项功能分离开。独立分配资源仍然有进程完成，作为系统资源分配和保护的陆地烂尾，无需频繁切换。后一项任务交给称为“线程”的实体来完成，线程作为系统调度和分派的基本单位，会频繁地调度和切换。</strong></p>
+<p>优点：</p>
+<ol>
+<li>快速线程切换。同一进程中的多线程切换只需改变堆栈和寄存器，地址空间不变。</li>
+<li>通信易于实现。自动共享进程的内存和文件，线程可以自由访问全局数据，实现数据共享十分方便，线程通信相对简单不必经过内核。</li>
+<li>减少管理开销。线程创建和撤销工作比进程少很多，而且无需再分配存储空间和各种资源。</li>
+<li>并发程度提高。多线程适宜并行工作，能充分发挥处理器与设备的并行工作能力，使多核和多处理器系统的效能发挥得更好。</li>
+</ol>
+<h2 id="多线程环境中的进程与线程"><a href="#多线程环境中的进程与线程" class="headerlink" title="多线程环境中的进程与线程"></a>多线程环境中的进程与线程</h2><h3 id="多线程"><a href="#多线程" class="headerlink" title="多线程"></a>多线程</h3><p><strong>无论是单线程环境还是多线程环境，线程在操作系统中均可定义为：操作系统中除处理器以外的资源分配和保护的基本单位。拥有一个独立的虚拟地址空间容纳进程映像，并以进程为单位对各种资源实施保护。</strong></p>
+<p><strong>线程是进程中能够并发执行的实体，是进程的组成部分，也是处理器调度和分派的基本单位，一个进程可以同时包含多个线程，这些线程共享进程所获得的内存空间和资源，可以为完成某一项任务而协同工作。</strong></p>
+<p>县城组成部分由线程唯一标识符、线程状态信息（运行态、就绪态、阻塞态、终止态）。线程是一条执行路径，有独立的程序计数器，未运行时保护线程上下文。线程拥有执行栈和存放局部变量的私有存储空间。可以访问所属进程的内存和和资源，并与该进程中其他线程共享这些资源。</p>
+<h3 id="线程状态"><a href="#线程状态" class="headerlink" title="线程状态"></a>线程状态</h3><p><strong>由于线程并不是资源的拥有单位，挂起状态对于线程是没有意义的。</strong>如果进程在挂起后背对换出内存，他的所有线程因共享地址空间也必须全部对换出内存，挂起操作是进程级的，而不是线程级的。同样，进程的终止将导致该进程的所有线程终止。</p>
+<h3 id="线程组织"><a href="#线程组织" class="headerlink" title="线程组织"></a>线程组织</h3><p>一个进程可以包含若干线程，这些线程可以有多种组织方式：调度员－工作者模式、组模式、流水线模式等。</p>
+<h2 id="线程的实现"><a href="#线程的实现" class="headerlink" title="线程的实现"></a>线程的实现</h2><p>多线程实现分为内核级线程（Kernel Level Thread）、用户级线程（User Level Thread）两种，有些系统提供混合式线程。</p>
+<h3 id="内核级线程"><a href="#内核级线程" class="headerlink" title="内核级线程"></a>内核级线程</h3><p>线程的管理工作由内核完成，并提供线程API来使用线程。</p>
+<p>优点：多处理器上内核能够同时调度同一进程中的多线程并行执行；一个线程被阻塞，内核能够调度同一进程的其他线程占有处理器运行，也可以运行其他进程中的线程；由于内核级线程只有很小的数据结构和堆栈，切换速度快，内核自身也可以用多线程技术实现，从而提高了系统执行效率。</p>
+<p>缺点：线程在用户态运行，线程调度和管理在内核实现，在同一进程中控制权从一个线程传送到另一个线程时需要用户态－内核态－用户态模式转换，系统开销大。</p>
+<h3 id="用户级线程"><a href="#用户级线程" class="headerlink" title="用户级线程"></a>用户级线程</h3><p>线程的管理工作由应用程序来做，在用户空间内实现，内核不知道线程的存在。</p>
+<p>优点：线程切换无需使用内核特权方式，所有线程管理的数据结构均在用户空间中，可以节省模式转换开销和内核的宝贵资源来；允许进程按照应用的特定需要选择调度算法，且可以执行在任何操作系统上，内核无需改变。</p>
+<p>缺点：由于大多数系统调用时阻塞型的，因此一个用户级线程的阻塞将引起整个进程阻塞；用户级线程不能利用多重处理的优点，进程由内核分配到CPU上，仅有一个用户级线程可以执行，不能得益于多线程的并发执行。</p>
+<h3 id="混合式线程"><a href="#混合式线程" class="headerlink" title="混合式线程"></a>混合式线程</h3><p>Solaris就是一个既支持内核级线程又支持用户级线程的操作系统，线程的实现分为两个层次，用户层和核心层。</p>
+<h3 id="线程调度"><a href="#线程调度" class="headerlink" title="线程调度"></a>线程调度</h3><p>当若干进程都有多线程时，就存在两个层次并行：进程和线程。</p>
+<p>对于用户级线程，内核并不知道线程的存在，所以操作系统调度程序以进程为单位进行调度。对于内核级线程，操作系统会选择一个优先级高的线程运行，不用考虑该线程属于哪个进程，赋予这个线程一个时间片，超时会强制阻塞该线程。</p>
+<p>用户级线程和内核级线程之间的差别在于性能。</p>
+<h1 id="处理器调度"><a href="#处理器调度" class="headerlink" title="处理器调度"></a>处理器调度</h1><h2 id="处理器调度层次"><a href="#处理器调度层次" class="headerlink" title="处理器调度层次"></a>处理器调度层次</h2><h3 id="高级调度"><a href="#高级调度" class="headerlink" title="高级调度"></a>高级调度</h3><p>在多道批处理操作系统中，从输入系统的一批作业中按照预定的调度策略挑选若干作业进入内存，为其分配所需资源，并创建对应作业的用户进程后，便完成启动阶段的高级调度任务，已经为进程做好运行前的额额准备工作（具备参与CPU竞争资格）。等待进程被调度运行，在作业完成后还要做结束阶段的善后工作。</p>
+<p>高级调度宏观上控制多道程序道数，被选择进入内存的作业越多，每个作业获得的CPU时间就越少。</p>
+<h3 id="中级调度"><a href="#中级调度" class="headerlink" title="中级调度"></a>中级调度</h3><p>根据内存资源情况决定内存中所能容纳的进程数目，并完成外存和内存中的进程对换工作。当内存资源紧缺，会把暂时不能运行的进程对换出内存，此进程处于挂起状态，不参与低级调度。当进程具备运行条件且内存资源富裕时，再将进程重新调回内存工作，起到短期均衡系统负载的作用，充分提高内存利用率和系统吞吐率。</p>
+<h3 id="低级调度"><a href="#低级调度" class="headerlink" title="低级调度"></a>低级调度</h3><p>根据某种原则决定就绪队列中哪个进程或线程获得处理器，并将处理器出让给它使用。</p>
+<p>低级调度是操作系统最核心的部分，执行十分频繁，调度策略优劣直接影响系统性能。</p>
+<h2 id="选择调度算法的原则"><a href="#选择调度算法的原则" class="headerlink" title="选择调度算法的原则"></a>选择调度算法的原则</h2><p>选择调度算法的基本原则是计算机系统性能尽可能好。下面列出5条选择调度算法原则中，前三条面向系统的性能指标，后两条面向用户的性能指标。</p>
+<ol>
+<li>资源利用率：让CPU和各种资源尽可能并行工作，使得资源利用率尽可能高。CPU利用率=CPU有效工作时间/CPU总的运行时间</li>
+<li>吞吐率：单位时间内CPU处理作业的个数，显然，所处理的长作业多则吞吐率低，所处理短作业多则吞吐率高。</li>
+<li>公平性：确保每个进程都能获得合理的CPU份额和其他资源份额，不会出现饥饿现象。</li>
+<li>响应时间：交互式用户的响应时间尽可能短或尽快处理实时任务。</li>
+<li>周转时间：作业周转时间或平均作业周转时间尽可能短。</li>
+</ol>
+<p>批处理系统的调度性能用作业周转时间和带全作业周转时间来衡量，时间越短，系统效率越高，作业吞吐率越高。如果作业i提交给系统的时刻是ts，完成时刻tf，那么作业i的周转时间t为t=tf-ts</p>
+<p>通常平均作业周转时间用来衡量不同调度算法对同一作业流的调度性能，平均带权作业周转时间用来衡量同一调度算法对不同作业流的调度性能，这两个数值都是越小越好。</p>
+<h2 id="作业管理与调度"><a href="#作业管理与调度" class="headerlink" title="作业管理与调度"></a>作业管理与调度</h2><h3 id="作业与进程的关系"><a href="#作业与进程的关系" class="headerlink" title="作业与进程的关系"></a>作业与进程的关系</h3><p>作业是用户提交给操作系统计算的一个独立任务。作业是任务实体，进程是完成任务的执行实体；没有作业任务，进程无事可做；没有进程作业任务无法完成。作业的概念更多地用于批处理操作系统中，而进程则用于各种多道程序设计系统。</p>
+<h3 id="作业管理与调度-1"><a href="#作业管理与调度-1" class="headerlink" title="作业管理与调度"></a>作业管理与调度</h3><p>作业可以分为批处理作业和交互型作业。</p>
+<p>// TODO: 展开说明</p>
+<h2 id="低级调度功能和类型"><a href="#低级调度功能和类型" class="headerlink" title="低级调度功能和类型"></a>低级调度功能和类型</h2><h3 id="低级调度功能"><a href="#低级调度功能" class="headerlink" title="低级调度功能"></a>低级调度功能</h3><p>调度程序担负两项任务：调度和分派。调度实现调度策略，确定就绪态进程/线程竞争使用处理器的次序的裁决原则；分派实现调度机制，确定如何时分服用CPU，处理上下文切换，完成进程和线程同CPU的绑定和放弃的实际工作。</p>
+<h3 id="低级调度用途"><a href="#低级调度用途" class="headerlink" title="低级调度用途"></a>低级调度用途</h3><p>正在执行的进程/线程运行结束或由于某事件无法继续运行，出现更高优先级的线程/进程，需剥夺当前进程/线程使用CPU等。</p>
+<p>创建进程/线程，进程/线程终止，进程/线程阻塞，进程/线程运行中中断异常，进程/线程执行系统调用，进程/线程请求I/O操作完成，进程/线程耗尽时间片，进程/线程改变优先级等操作后，均需要低级调度。</p>
+<h3 id="低级调度类型"><a href="#低级调度类型" class="headerlink" title="低级调度类型"></a>低级调度类型</h3><p>由于调度程序自身开销及内存磁盘对换程序与数据开销，剥夺式策略比非剥夺式策略开销大。大多数操作系统采用两方法混合策略。</p>
+<h4 id="剥夺式调度"><a href="#剥夺式调度" class="headerlink" title="剥夺式调度"></a>剥夺式调度</h4><p>又称抢占式调度，根据规定原则剥夺分配给此线程的处理器，并移入就绪队列。高优先级进程/线程可剥夺低优先级的；在动态改变优先级的系统中，当进程/线程时间片用完后也会被剥夺。</p>
+<h4 id="非剥夺式调度"><a href="#非剥夺式调度" class="headerlink" title="非剥夺式调度"></a>非剥夺式调度</h4><p>又称非抢占式调度，一旦某进程/线程开始运行后，便不再让出处理器，除非该进程/线程主动放弃处理器，或因某事件不能继续执行。</p>
+<h2 id="作业调度和低级调度算法"><a href="#作业调度和低级调度算法" class="headerlink" title="作业调度和低级调度算法"></a>作业调度和低级调度算法</h2><p>多数调度算法对两种调度都适用。</p>
+<h3 id="FCFS先来先服务"><a href="#FCFS先来先服务" class="headerlink" title="FCFS先来先服务"></a>FCFS先来先服务</h3><p>First Come First Served，按照作业进入系统后备作业队列的先后次序挑选作业，先进入系统的作业先进入内存，创建用户进程，分配资源，进入就绪队列。非剥夺式算法，易于实现，效率不高。未考虑作业要求服务时间长度昂，不利于段作业，不利于I/O繁忙型作业，有利于CPU繁忙型作业。</p>
+<p>该算法适用于进程/线程调度，每次从就绪队列中选择最先进入的进程/线程。</p>
+<p>假设存在以下三个作业：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">作业名</th>
+<th style="text-align:center">所需CPU时间/ms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">作业1</td>
+<td style="text-align:center">28</td>
+</tr>
+<tr>
+<td style="text-align:center">作业2</td>
+<td style="text-align:center">9</td>
+</tr>
+<tr>
+<td style="text-align:center">作业3</td>
+<td style="text-align:center">3</td>
+</tr>
+</tbody>
+</table>
+<p>采用FCFS调度算法，若按照1、2、3的顺序进入系统队列，那么平均作业周转时间T=(28+(28+9)+(28+9+3))/3=35ms，如果我们把作业进入系统顺序改为3、2、1，那么平均作业周转时间就为T=(3+(3+9)+(3+9+28))/3=18ms，所以该算法的平均作业周转时间与作业提交、调度的顺序有关。</p>
+<h3 id="SJF最短作业优先"><a href="#SJF最短作业优先" class="headerlink" title="SJF最短作业优先"></a>SJF最短作业优先</h3><p>Shortest Job First，已进入系统作业所要求的CPU时间长短为标准，总是选取预计计算时间最短的作业运行，非剥夺式算法，能克服FCFS的偏爱长作业缺点，易于实现，效率不高。缺点：先要与之作业所需CPU时间，难以估算准确，估值过低会提前终止；忽视作业等待时间，若系统不断接收新作业，系统总会选择最短作业运行，导致长作业时间作业一直等待，发生饥饿现象；由于缺少剥夺机制，对分时、实时处理不理想。</p>
+<p>假设存在以下四个作业：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">作业名</th>
+<th style="text-align:center">所需CPU时间/ms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">作业1</td>
+<td style="text-align:center">9</td>
+</tr>
+<tr>
+<td style="text-align:center">作业2</td>
+<td style="text-align:center">4</td>
+</tr>
+<tr>
+<td style="text-align:center">作业3</td>
+<td style="text-align:center">10</td>
+</tr>
+<tr>
+<td style="text-align:center">作业4</td>
+<td style="text-align:center">8</td>
+</tr>
+</tbody>
+</table>
+<p>采用SJF调度算法，作业调度顺序是2、4、1、3，那么平均作业周转时间T=(4+(4+8)+(4+8+9)+(4+8+9+10))/4=68/17ms，平均带权作业周转时间W=(4/4+(4+8)/8+(4+8+9)/9+(4+8+9+10)/10)/4=1.98。</p>
+<p>若采用FCFS算法，作业调度顺序是1、2、3、4，平均作业周转时间T=(9+(9+4)+(9+4+10)+(9+4+10+8))/4=19ms，平均带权作业周转时间W=(9/9+(9+4)/4+(9+4+10)/10+(9+4+10+8)/8)/4=2.61ms。</p>
+<p>所以SJF相较FCFS的性能要好，但实现SJF需要预先知道作业运行时间。在两个作业所需CPU时间相同的情况下，对这两个作业采用FCFS。</p>
+<h3 id="SRTF最短剩余时间优先"><a href="#SRTF最短剩余时间优先" class="headerlink" title="SRTF最短剩余时间优先"></a>SRTF最短剩余时间优先</h3><p>在SJF的基础上，改造为剥夺式调度算法，即成Shortest Remaining Time First，每执行一次，选择一次剩余时间最短的作业执行。</p>
+<p>假设存在以下四个进程：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">进程名</th>
+<th style="text-align:center">到达时间</th>
+<th style="text-align:center">所需CPU时间/ms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">p1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">8</td>
+</tr>
+<tr>
+<td style="text-align:center">p2</td>
+<td style="text-align:center">1</td>
+<td style="text-align:center">4</td>
+</tr>
+<tr>
+<td style="text-align:center">p3</td>
+<td style="text-align:center">2</td>
+<td style="text-align:center">9</td>
+</tr>
+<tr>
+<td style="text-align:center">p4</td>
+<td style="text-align:center">3</td>
+<td style="text-align:center">5</td>
+</tr>
+</tbody>
+</table>
+<p>用SRTF，在0时刻，p1到达，执行一次后p1所需时间变为7，此时p2到达，选择p2执行，执行一次后p2所需时间变为3，此时p3到达，那么就在p1的7、p2的3和p3的9中选择最小CPU时间的进程执行，那么还是执行p2，执行一次后p4到达，那么现在就在p1的7、p2的2、p3的9和p4的5中选择最小CPU时间的进程执行。</p>
+<p>将执行过程列举如下：p1执行1次，p2执行4次到结束，p4执行5次到结束，p1执行7次到结束，p3执行9次到结束。</p>
+<p>// TODO: 平均等待时间和平均周转时间</p>
+<h3 id="HRRF最高响应比优先"><a href="#HRRF最高响应比优先" class="headerlink" title="HRRF最高响应比优先"></a>HRRF最高响应比优先</h3><p>FCFS和SJF都比较片面，HRRF介于这两种算法之间的这种非剥夺式算法，既考虑作业等待时间，又考虑作业处理时间。缺点是没次计算各作业响应比会占用一定时间开销，性能略差于SJF，等待时间和处理时间之和是系统对作业的响应时间，它于处理时间的比值称为响应比：</p>
+<p>响应比=作业周转时间/作业处理时间=(作业等待时间+作业处理时间)/作业处理时间=1+作业等待时间/作业处理时间。</p>
+<p>作业处理时间是用户给出常量，作业等待时间从0开始，随作业在后备队列中等待时间增长而变长，当调度作业运行时，计算后备作业队列的各作业响应比作为优先级，再投入最高优先级的执行。</p>
+<p>短作业易获得高响应比，随着长作业在系统中等待时间变长，其优先级提高，不会发生饥饿现象。</p>
+<p>假设存在以下四个作业：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">作业名</th>
+<th style="text-align:center">到达时间</th>
+<th style="text-align:center">所需CPU时间/ms</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">作业1</td>
+<td style="text-align:center">0</td>
+<td style="text-align:center">20</td>
+</tr>
+<tr>
+<td style="text-align:center">作业2</td>
+<td style="text-align:center">5</td>
+<td style="text-align:center">15</td>
+</tr>
+<tr>
+<td style="text-align:center">作业3</td>
+<td style="text-align:center">10</td>
+<td style="text-align:center">5</td>
+</tr>
+<tr>
+<td style="text-align:center">作业4</td>
+<td style="text-align:center">15</td>
+<td style="text-align:center">10</td>
+</tr>
+</tbody>
+</table>
+<p>采用HRRF，执行过程为：</p>
+<table>
+<thead>
+<tr>
+<th style="text-align:center">时间</th>
+<th style="text-align:center">执行</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td style="text-align:center">0-20</td>
+<td style="text-align:center">执行作业1，之后2等15ms，3等10ms，4等5ms</td>
+</tr>
+<tr>
+<td style="text-align:center">21-25</td>
+<td style="text-align:center">执行作业3，之后2等20ms，4等10ms</td>
+</tr>
+<tr>
+<td style="text-align:center">26-40</td>
+<td style="text-align:center">执行作业2，之后4等25ms</td>
+</tr>
+<tr>
+<td style="text-align:center">41-50</td>
+<td style="text-align:center">执行作业4</td>
+</tr>
+</tbody>
+</table>
+<p>平均作业周转时间T=(20+(40-5)+(25-10)+(50-15))/4=26.25，平均带权作业周转时间W=(20/20+35/15+15/5+35/10)/4=2.46。由此可见，HRRF性能介于SJF和FCFS之间，HRRF同样可用于进程调度，响应比定义为1+进程等待时间/进程预计计算时间。</p>
+<h3 id="优先级调度"><a href="#优先级调度" class="headerlink" title="优先级调度"></a>优先级调度</h3><p>该算法根据确定的优先级来选取进程/线程执行，总执行就绪队列优先级最高者。需要预先规定非剥夺式或剥夺式。</p>
+<h3 id="RR轮转调度"><a href="#RR轮转调度" class="headerlink" title="RR轮转调度"></a>RR轮转调度</h3><p>Round-Robin也称时间片调度，调度程序没次把CPU分配给就绪队列首进程/线程使用规定时间片（时间间隔），就绪队列中每个进程/线程运行一个时间片，执行完一个时间片就出队再进队尾。是剥夺式算法。</p>
+<h3 id="MLFQ多级反馈队列调度"><a href="#MLFQ多级反馈队列调度" class="headerlink" title="MLFQ多级反馈队列调度"></a>MLFQ多级反馈队列调度</h3><p>Multi-Level Feedback Queue又称反馈循环队列，由系统建立多个就绪队列，每个队列对应一个优先级，第一队列优先级最高，其余队列优先级依次降低，高优先级队列的进程/线程分配较短时间片，低优先级队列分配较长时间片，最后一个队列按照FCFS进行调度，处理器调度每次先从第一个队列中选取执行者，同一队列按照FCFS排队执行。若第一队列未选到执行者， 那么从第二队列中选取。</p>
+<p>MLFQ性能较好，会导致饥饿问题。</p>
+
+        <div class="bd-reward-stl"><button id="bdRewardBtn"><span></span></button></div>
+      
+    </div>
+    <footer class="article-footer">
+      
+        <a data-url="http://blog.talisk.cn//blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" data-id="cj0yx5be4000ni6jv8fbnw8e0" class="article-share-link" data-share="baidu" data-title="操作系统学习笔记-01处理器管理">分享到</a>
+      
+
+      
+        <a href="http://blog.talisk.cn//blog/2015/10/11/OS-Learning-02-CPU-Scheduling/#ds-thread" class="article-comment-link">评论</a>
+      
+
+      
+  <ul class="article-tag-list"><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/学习笔记/">学习笔记</a></li><li class="article-tag-list-item"><a class="article-tag-list-link" href="/tags/操作系统/">操作系统</a></li></ul>
+
+    </footer>
+  </div>
+  
+    
+<nav id="article-nav">
+  
+    <a href="/blog/2015/11/07/CPU-Scheduling-with-C-simulation/" id="article-nav-newer" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">下一篇</strong>
+      <div class="article-nav-title">
+        
+          C语言模拟实现CPU进程调度
+        
+      </div>
+    </a>
+  
+  
+    <a href="/blog/2015/09/29/Making-a-continuous-input-UITextFields-group/" id="article-nav-older" class="article-nav-link-wrap">
+      <strong class="article-nav-caption">上一篇</strong>
+      <div class="article-nav-title">多个UITextField连贯输入表单的制作</div>
+    </a>
+  
+</nav>
+
+  
+</article>
+
+
+  <section id="comments">
+    <div id="ds-thread" class="ds-thread" data-thread-key="/blog/2015/10/11/OS-Learning-02-CPU-Scheduling/" data-title="操作系统学习笔记-01处理器管理" data-url="http://blog.talisk.cn//blog/2015/10/11/OS-Learning-02-CPU-Scheduling/"></div>
+  </section>
+</section>
+      
+      <aside id="sidebar">
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">分类</h3>
+    <div class="widget">
+      <ul class="category-list"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/">技术</a><span class="category-list-count">43</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/">C/C++</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/函数实现/">函数实现</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/C-C/算法与数据结构/">算法与数据结构</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/">ReactNative</a><span class="category-list-count">3</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/学习笔记/">学习笔记</a><span class="category-list-count">2</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/ReactNative/开发技巧/">开发技巧</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/">iOS</a><span class="category-list-count">25</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/学习笔记/">学习笔记</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/开发技巧/">开发技巧</a><span class="category-list-count">17</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/iOS/第三方库/">第三方库</a><span class="category-list-count">3</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/">专业课</a><span class="category-list-count">11</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/操作系统/">操作系统</a><span class="category-list-count">6</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/数据库原理及应用/">数据库原理及应用</a><span class="category-list-count">4</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/专业课/计算机网络/">计算机网络</a><span class="category-list-count">1</span></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/">前端</a><span class="category-list-count">1</span><ul class="category-list-child"><li class="category-list-item"><a class="category-list-link" href="/categories/技术/前端/学习笔记/">学习笔记</a><span class="category-list-count">1</span></li></ul></li></ul></li><li class="category-list-item"><a class="category-list-link" href="/categories/未分类/">未分类</a><span class="category-list-count">1</span></li><li class="category-list-item"><a class="category-list-link" href="/categories/随笔/">随笔</a><span class="category-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签</h3>
+    <div class="widget">
+      <ul class="tag-list"><li class="tag-list-item"><a class="tag-list-link" href="/tags/CocoaPods/">CocoaPods</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CodePush/">CodePush</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/CoreBluetooth/">CoreBluetooth</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JSON/">JSON</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/JavaScript/">JavaScript</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/NSString/">NSString</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/ReactNative/">ReactNative</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Redux/">Redux</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/Swift/">Swift</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIApplication/">UIApplication</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigation/">UINavigation</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UINavigationController/">UINavigationController</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITableView/">UITableView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UITextField/">UITextField</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWebView/">UIWebView</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/UIWindow/">UIWindow</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS/">iOS</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/iOS应用审核/">iOS应用审核</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/podfile/">podfile</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/property/">property</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/互联网/">互联网</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/产品/">产品</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/代码统计/">代码统计</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存管理/">内存管理</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/内存释放/">内存释放</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/函数/">函数</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/分享/">分享</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/前端/">前端</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/单例/">单例</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/字符串/">字符串</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习笔记/">学习笔记</a><span class="tag-list-count">14</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/学习路线/">学习路线</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/开发日志/">开发日志</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/思考/">思考</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/性能优化/">性能优化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/技巧/">技巧</a><span class="tag-list-count">13</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/控件/">控件</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/操作系统/">操作系统</a><span class="tag-list-count">7</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据库/">数据库</a><span class="tag-list-count">4</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据持久化/">数据持久化</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/数据结构/">数据结构</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/日志/">日志</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/服务器开发/">服务器开发</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/第三方库/">第三方库</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/算法/">算法</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/自动布局/">自动布局</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/蓝牙/">蓝牙</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/计算机网络/">计算机网络</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/记录/">记录</a><span class="tag-list-count">3</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/调试/">调试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/资料/">资料</a><span class="tag-list-count">2</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/随笔/">随笔</a><span class="tag-list-count">6</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试/">面试</a><span class="tag-list-count">1</span></li><li class="tag-list-item"><a class="tag-list-link" href="/tags/面试题/">面试题</a><span class="tag-list-count">2</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">标签云</h3>
+    <div class="widget tagcloud">
+      <a href="/tags/CocoaPods/" style="font-size: 12.86px;">CocoaPods</a> <a href="/tags/CodePush/" style="font-size: 10px;">CodePush</a> <a href="/tags/CoreBluetooth/" style="font-size: 10px;">CoreBluetooth</a> <a href="/tags/JSON/" style="font-size: 10px;">JSON</a> <a href="/tags/JavaScript/" style="font-size: 10px;">JavaScript</a> <a href="/tags/NSString/" style="font-size: 10px;">NSString</a> <a href="/tags/ReactNative/" style="font-size: 12.86px;">ReactNative</a> <a href="/tags/Redux/" style="font-size: 10px;">Redux</a> <a href="/tags/Swift/" style="font-size: 10px;">Swift</a> <a href="/tags/UIApplication/" style="font-size: 10px;">UIApplication</a> <a href="/tags/UINavigation/" style="font-size: 10px;">UINavigation</a> <a href="/tags/UINavigationController/" style="font-size: 10px;">UINavigationController</a> <a href="/tags/UITableView/" style="font-size: 10px;">UITableView</a> <a href="/tags/UITextField/" style="font-size: 10px;">UITextField</a> <a href="/tags/UIWebView/" style="font-size: 10px;">UIWebView</a> <a href="/tags/UIWindow/" style="font-size: 10px;">UIWindow</a> <a href="/tags/iOS/" style="font-size: 12.86px;">iOS</a> <a href="/tags/iOS应用审核/" style="font-size: 10px;">iOS应用审核</a> <a href="/tags/podfile/" style="font-size: 10px;">podfile</a> <a href="/tags/property/" style="font-size: 10px;">property</a> <a href="/tags/互联网/" style="font-size: 10px;">互联网</a> <a href="/tags/产品/" style="font-size: 11.43px;">产品</a> <a href="/tags/代码统计/" style="font-size: 10px;">代码统计</a> <a href="/tags/内存管理/" style="font-size: 11.43px;">内存管理</a> <a href="/tags/内存释放/" style="font-size: 10px;">内存释放</a> <a href="/tags/函数/" style="font-size: 11.43px;">函数</a> <a href="/tags/分享/" style="font-size: 10px;">分享</a> <a href="/tags/前端/" style="font-size: 10px;">前端</a> <a href="/tags/单例/" style="font-size: 10px;">单例</a> <a href="/tags/字符串/" style="font-size: 10px;">字符串</a> <a href="/tags/学习笔记/" style="font-size: 20px;">学习笔记</a> <a href="/tags/学习路线/" style="font-size: 10px;">学习路线</a> <a href="/tags/开发日志/" style="font-size: 14.29px;">开发日志</a> <a href="/tags/思考/" style="font-size: 10px;">思考</a> <a href="/tags/性能优化/" style="font-size: 10px;">性能优化</a> <a href="/tags/技巧/" style="font-size: 18.57px;">技巧</a> <a href="/tags/控件/" style="font-size: 15.71px;">控件</a> <a href="/tags/操作系统/" style="font-size: 17.14px;">操作系统</a> <a href="/tags/数据库/" style="font-size: 14.29px;">数据库</a> <a href="/tags/数据持久化/" style="font-size: 10px;">数据持久化</a> <a href="/tags/数据结构/" style="font-size: 10px;">数据结构</a> <a href="/tags/日志/" style="font-size: 10px;">日志</a> <a href="/tags/服务器开发/" style="font-size: 10px;">服务器开发</a> <a href="/tags/第三方库/" style="font-size: 15.71px;">第三方库</a> <a href="/tags/算法/" style="font-size: 10px;">算法</a> <a href="/tags/自动布局/" style="font-size: 10px;">自动布局</a> <a href="/tags/蓝牙/" style="font-size: 10px;">蓝牙</a> <a href="/tags/计算机网络/" style="font-size: 10px;">计算机网络</a> <a href="/tags/记录/" style="font-size: 12.86px;">记录</a> <a href="/tags/调试/" style="font-size: 10px;">调试</a> <a href="/tags/资料/" style="font-size: 11.43px;">资料</a> <a href="/tags/随笔/" style="font-size: 15.71px;">随笔</a> <a href="/tags/面试/" style="font-size: 10px;">面试</a> <a href="/tags/面试题/" style="font-size: 11.43px;">面试题</a>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">归档</h3>
+    <div class="widget">
+      <ul class="archive-list"><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/04/">四月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2017/01/">一月 2017</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/11/">十一月 2016</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/08/">八月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/07/">七月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/05/">五月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/04/">四月 2016</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/03/">三月 2016</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/02/">二月 2016</a><span class="archive-list-count">4</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2016/01/">一月 2016</a><span class="archive-list-count">14</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/12/">十二月 2015</a><span class="archive-list-count">2</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/11/">十一月 2015</a><span class="archive-list-count">3</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/10/">十月 2015</a><span class="archive-list-count">1</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/09/">九月 2015</a><span class="archive-list-count">5</span></li><li class="archive-list-item"><a class="archive-list-link" href="/archives/2015/08/">八月 2015</a><span class="archive-list-count">5</span></li></ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">近期文章</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="/blog/2017/04/01/hello-world/">Hello World</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2017/01/24/Campus2017/">记2017年校招</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/10/TextInput-RN-Limit/">记一次TextInput控件字符长度限制</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/11/08/Perfect-Swifter/">全栈Swifter：用Perfect框架开发服务器端</a>
+          </li>
+        
+          <li>
+            <a href="/blog/2016/08/13/RN-Learning-path-for-iOS-developer/">写给iOS开发者的React Native学习路线</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    
+  <div class="widget-wrap">
+    <h3 class="widget-title">友情链接</h3>
+    <div class="widget">
+      <ul>
+        
+          <li>
+            <a href="http://mouxuejie.com/" target="_blank">某学姐 - 程序媛星荷</a>
+          </li>
+        
+          <li>
+            <a href="http://smileshirely.github.io/" target="_blank">指间花开 - 曹美屹</a>
+          </li>
+        
+          <li>
+            <a href="http://eqistyre.github.io/" target="_blank">SakuraNeko - 张仲昊</a>
+          </li>
+        
+          <li>
+            <a href="http://raylew.info/" target="_blank">爱上走路 - 刘雷</a>
+          </li>
+        
+          <li>
+            <a href="http://www.maskwang.cn/" target="_blank">MaskWang - 汪志峰</a>
+          </li>
+        
+      </ul>
+    </div>
+  </div>
+
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">关注我</h3>
+    <div class="widget">
+    	<li><a href="https://github.com/talisk">GitHub</a></li>
+    	<li><a href="http://stackoverflow.com/users/4905807/swain">StackOverflow</a></li>
+    	<li><a href="http://segmentfault.com/u/talisk">SegmentFault</a></li>
+    	<li><a href="http://www.zhihu.com/people/talisk">知乎</a></li>
+    	<li><a href="http://weibo.com/u/1574201213">新浪微博</a></li>
+    </div>
+  </div>
+  
+    <!--多说js加载开始，一个页面只需要加载一次 -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+(function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = 'http://static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0] || document.getElementsByTagName('body')[0]).appendChild(ds);
+})();
+</script>
+<!--多说js加载结束，一个页面只需要加载一次 -->
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最新评论</h3>
+    <div class="widget">
+    	<ul class="ds-recent-comments" data-num-items="5" data-show-avatars="1" data-show-time="1" data-show-admin="1" data-excerpt-length="70"></ul>
+    </div>
+</div>
+  
+    <div class="widget-wrap">
+    <h3 class="widget-title">最近访客</h3>
+    <div class="widget">
+    	<ul class="ds-recent-visitors" data-num-items="10"></ul> 
+	</div>
+</div>
+  
+</aside>
+      
+    </div>
+    <footer id="footer">
+  
+  <div class="outer">
+    <div id="footer-info" class="inner">
+      &copy; 2017 Swain 转载请注明出处 <script type="text/javascript">var cnzz_protocol = (("https:" == document.location.protocol) ? " https://" : " http://");document.write(unescape("%3Cspan id='cnzz_stat_icon_1256072395'%3E%3C/span%3E%3Cscript src='" + cnzz_protocol + "s11.cnzz.com/z_stat.php%3Fid%3D1256072395' type='text/javascript'%3E%3C/script%3E"));</script><br>
+      本博客由好吃不上火的<a href="http://hexo.io/" target="_blank">Hexo</a>强力驱动
+      主题基于开源项目<a href="https://github.com/xiangming/landscape-plus" target="_blank">Landscape-plus</a>
+    </div>
+  </div>
+</footer>
+  </div>
+  <nav id="mobile-nav">
+  
+    <a href="http://www.talisk.cn/" class="mobile-nav-link">个人主页</a>
+  
+    <a href="/" class="mobile-nav-link">博客首页</a>
+  
+    <a href="/archives" class="mobile-nav-link">归档</a>
+  
+    <a href="/about" class="mobile-nav-link">自述</a>
+  
+    <a href="http://wiki.talisk.cn/" class="mobile-nav-link">Wiki</a>
+  
+    <a href="/works" class="mobile-nav-link">作品</a>
+  
+</nav>
+  <!-- 百度打赏 -->
+<script type="text/javascript" src="https://zz.bdstatic.com/zzdashang/js/bd-zz-reward.js"></script>
+<!-- totop start -->
+<div id="totop">
+<a title="返回顶部"><img src="/img/scrollup.png"/></a>
+</div>
+
+<!-- totop end -->
+
+<!-- 多说公共js代码 start -->
+<script type="text/javascript">
+var duoshuoQuery = {short_name:"talisk"};
+  (function() {
+    var ds = document.createElement('script');
+    ds.type = 'text/javascript';ds.async = true;
+    ds.src = (document.location.protocol == 'https:' ? 'https:' : 'http:') + '//static.duoshuo.com/embed.js';
+    ds.charset = 'UTF-8';
+    (document.getElementsByTagName('head')[0]
+     || document.getElementsByTagName('body')[0]).appendChild(ds);
+  })();
+  </script>
+<!-- 多说公共js代码 end -->
+
+
+<!-- 新百度分享 start -->
+<div id="article-share-box" class="article-share-box">
+<div id="bdshare" class="bdsharebuttonbox"><a href="#" class="bds_more" data-cmd="more"></a><a href="#" class="bds_mshare" data-cmd="mshare" title="分享到一键分享"></a><a href="#" class="bds_print" data-cmd="print" title="分享到打印"></a><a href="#" class="bds_mail" data-cmd="mail" title="分享到邮件分享"></a><a href="#" class="bds_tsina" data-cmd="tsina" title="分享到新浪微博"></a><a href="#" class="bds_renren" data-cmd="renren" title="分享到人人网"></a><a href="#" class="bds_qzone" data-cmd="qzone" title="分享到QQ空间"></a><a href="#" class="bds_weixin" data-cmd="weixin" title="分享到微信"></a><a href="#" class="bds_sqq" data-cmd="sqq" title="分享到QQ好友"></a><a href="#" class="bds_copy" data-cmd="copy" title="分享到复制网址"></a></div>
+<script>window._bd_share_config={"common":{"bdSnsKey":{},"bdText":"","bdMini":"1","bdMiniList":false,"bdPic":"","bdStyle":"0","bdSize":"24"},"share":{}};with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?v=89860593.js?cdnversion='+~(-new Date()/36e5)];</script>
+</div>
+<!-- 新百度分享 end -->
+
+<!-- 
+百度分享 start
+<div id="article-share-box" class="article-share-box">
+  <div id="bdshare" class="bdsharebuttonbox article-share-links">
+    <a class="article-share-weibo" data-cmd="tsina" title="分享到新浪微博"></a>
+    <a class="article-share-weixin" data-cmd="weixin" title="分享到微信"></a>
+    <a class="article-share-qq" data-cmd="sqq" title="分享到QQ"></a>
+    <a class="article-share-renren" data-cmd="renren" title="分享到人人网"></a>
+    <a class="article-share-more" data-cmd="more" title="更多"></a>
+  </div>
+</div>
+<script>
+  function SetShareData(cmd, config) {
+    if (shareDataTitle && shareDataUrl) {
+      config.bdText = shareDataTitle;
+      config.bdUrl = shareDataUrl;
+    }
+    return config;
+  }
+  window._bd_share_config={
+    "common":{onBeforeClick: SetShareData},
+    "share":{"bdCustomStyle":"/css/bdshare.css"}
+  };
+  with(document)0[(getElementsByTagName('head')[0]||body).appendChild(createElement('script')).src='http://bdimg.share.baidu.com/static/api/js/share.js?cdnversion='+~(-new Date()/36e5)];
+</script>
+
+百度分享 end
+ -->
+
+<script src="//cdnjs.cloudflare.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+
+
+
+
+<script src="/js/script.js"></script>
+
+</div>
+</body>
+</html>
