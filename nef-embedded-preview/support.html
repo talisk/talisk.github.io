@@ -1,0 +1,159 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>NefEmbeddedPreview Support</title>
+  <style>
+    :root {
+      color-scheme: light dark;
+      --bg: #f7f7f4;
+      --fg: #151515;
+      --muted: #62625c;
+      --line: #d8d8d2;
+      --panel: #ffffff;
+      --accent: #0b6e5f;
+      --code: #ecece6;
+    }
+
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #151515;
+        --fg: #f2f1ec;
+        --muted: #b9b7ae;
+        --line: #33332f;
+        --panel: #1e1e1b;
+        --accent: #61d1bd;
+        --code: #2a2a26;
+      }
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    body {
+      margin: 0;
+      min-height: 100vh;
+      background: var(--bg);
+      color: var(--fg);
+      font: 16px/1.6 -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+    }
+
+    main {
+      width: min(860px, calc(100% - 40px));
+      margin: 0 auto;
+      padding: 56px 0 72px;
+    }
+
+    nav {
+      margin-bottom: 36px;
+    }
+
+    h1 {
+      margin: 0 0 14px;
+      font-size: clamp(34px, 6vw, 56px);
+      line-height: 1.05;
+      letter-spacing: 0;
+    }
+
+    h2 {
+      margin: 34px 0 10px;
+      font-size: 22px;
+      letter-spacing: 0;
+    }
+
+    p {
+      margin: 0 0 16px;
+      color: var(--muted);
+      max-width: 720px;
+    }
+
+    ul {
+      margin: 0 0 18px;
+      padding-left: 22px;
+      color: var(--muted);
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    a {
+      color: var(--accent);
+      text-decoration-thickness: 1px;
+      text-underline-offset: 3px;
+    }
+
+    code {
+      padding: 2px 5px;
+      border-radius: 5px;
+      background: var(--code);
+      color: var(--fg);
+      font: 0.94em ui-monospace, SFMono-Regular, Menlo, Consolas, monospace;
+    }
+
+    .panel {
+      margin-top: 24px;
+      padding: 22px;
+      border: 1px solid var(--line);
+      border-radius: 8px;
+      background: var(--panel);
+    }
+
+    .muted {
+      color: var(--muted);
+      font-size: 14px;
+    }
+  </style>
+</head>
+<body>
+  <main>
+    <nav><a href="./index.html">NefEmbeddedPreview</a></nav>
+
+    <h1>Support</h1>
+    <p>
+      For help with NefEmbeddedPreview, contact
+      <a href="mailto:soontalisk@icloud.com">soontalisk@icloud.com</a>.
+    </p>
+
+    <section class="panel">
+      <h2>What to include</h2>
+      <ul>
+        <li>Your macOS version.</li>
+        <li>The camera RAW file extension, such as <code>.nef</code>, <code>.arw</code>, <code>.cr3</code>, <code>.rw2</code>, <code>.pef</code>, or <code>.3fr</code>.</li>
+        <li>Whether the problem appears in Finder thumbnails, Quick Look preview, or the app viewer.</li>
+      </ul>
+    </section>
+
+    <h2>How it works</h2>
+    <p>
+      NefEmbeddedPreview previews embedded JPEG data inside RAW files. It does
+      not develop RAW sensor data and it does not modify the original files.
+    </p>
+
+    <h2>Finder and Quick Look</h2>
+    <p>
+      After installation, macOS discovers the bundled Quick Look extensions and
+      Finder can use them for thumbnails and Quick Look previews. If Finder has
+      cached an older thumbnail, moving the file, relaunching Finder, or waiting
+      for the cache to refresh can help.
+    </p>
+    <p>
+      This app helps Finder Quick Look. Apple's Preview app may still report
+      that a RAW file type is unsupported.
+    </p>
+
+    <h2>Privacy</h2>
+    <p>
+      Files are processed locally on your Mac. NefEmbeddedPreview does not
+      upload photos, require an account, or include analytics or tracking.
+    </p>
+
+    <p class="muted">
+      This public support site is for a proprietary macOS app. It does not
+      publish the app source code.
+    </p>
+  </main>
+</body>
+</html>
